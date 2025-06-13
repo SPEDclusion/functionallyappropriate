@@ -22,6 +22,26 @@ import {
   Trash2,
 } from 'lucide-react';
 
+// Interface for individual goals (remains from your original, studentName added)
+interface Goal {
+  id: number;
+  studentName?: string; // Made optional for flexibility
+  area: string;
+  description: string;
+  baseline: string;
+  targetDate: string;
+  status: 'draft' | 'active' | 'completed';
+}
+
+// Interface for defining each step in the wizard (from your original)
+interface WizardStep {
+  id: number;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}
+
+// NEW/UPDATED WizardData Interface for all 10 steps
 interface WizardData {
   // Step 1: Student Demographics
   studentName: string;
@@ -31,28 +51,85 @@ interface WizardData {
   secondaryDisability: string;
   studentInterestsGeneralInfo: string;
   englishLearnerStatus: 'ELL' | 'EO' | 'RFEP' | '';
-}
 
-interface Goal {
-  id: number;
-  area: string;
-  description: string;
-  baseline: string;
-  targetDate: string;
-  status: 'draft' | 'active' | 'completed';
-}
+  // Step 2: Previous IEP Goals
+  previousGoalDomain: string;
+  previousGoalStandardId: string;
+  previousGoalAnnualGoalText: string;
+  previousGoalProgressStatus: 'met' | 'not_met' | 'partially_met' | 'minimal_progress' | 'objectives_met' | 'not_annual_goal' | '';
+  previousGoalContinuedNeed: 'yes' | 'no' | '';
+  showPreviousObjectives: boolean;
+  previousObjective1Text: string;
+  previousObjective1Status: 'met' | 'not_met' | 'partially_met' | '';
+  previousObjective2Text: string;
+  previousObjective2Status: 'met' | 'not_met' | 'partially_met' | '';
+  previousObjective3Text: string;
+  previousObjective3Status: 'met' | 'not_met' | 'partially_met' | '';
 
-interface WizardStep {
-  id: number;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
+  // Step 3: Student Context & Supports
+  anecdotalObservationsGE: string;
+  academicStrengthsGeneralInfo: string;
+  areasOfGrowthQualitative: string;
+
+  // Step 4: Existing Student Data Input
+  benchmarkAssessmentType: 'NWEA' | 'Curriculum-Based' | 'Benchmark' | 'Other' | '';
+  benchmarkAssessmentOtherName: string;
+  benchmarkDataManualInput: string;
+  nweaRitScore: string;
+  nweaPercentilePeers: string;
+  nweaGrowthPercentile: string;
+  statewideAssessmentType: 'SBAC' | 'CAA' | '';
+  statewideAssessmentScores: string;
+  elpacScores: string;
+
+  // Step 5: New Baseline Data Analysis
+  newBaselineDomain: string;
+  newBaselineStandardId: string;
+  newBaselineResultsQuantitative: string;
+  newBaselineAdditionalInfoQualitative: string;
+  newBaselineSupportsToIncreaseAccess: string;
+
+  // Step 6: Student Accommodations and Supports
+  accommodations: string[];
+  modifications: string[];
+  behaviorNeeds: 'yes' | 'no' | '';
+  behaviorSupports: string[];
+  elSupports: string;
+
+  // Step 7: Special Factors
+  assistiveTechNeeded: 'yes' | 'no' | '';
+  assistiveTechRationale: string;
+  blindVisualImpairment: 'yes' | 'no' | '';
+  deafHardOfHearing: 'yes' | 'no' | '';
+  behaviorImpedingLearning: 'yes' | 'no' | '';
+  behaviorInterventionsStrategies: string;
+
+  // Step 8: Present Levels
+  draftPresentLevels: string;
+
+  // Step 9: Goal Proposal
+  draftAnnualGoal: string;
+  draftObjective1: string;
+  draftObjective2: string;
+  draftObjective3: string;
+
+  // Step 10: Related Services
+  relatedServiceType: 'SAI' | 'BIS' | 'Other' | '';
+  relatedServiceOtherName: string;
+  relatedServiceDuration: string;
+  relatedServiceFrequency: 'weekly' | 'monthly' | 'daily' | '';
+  relatedServiceDelivery: 'individual' | 'group' | '';
+  relatedServiceLocation: string;
+  relatedServiceComments: string;
+  relatedServiceStartDate: string;
+  relatedServiceEndDate: string;
 }
 
 const GoalWriting: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([
     {
       id: 1,
+      studentName: 'Alex Chen',
       area: 'Reading Comprehension',
       description: 'Student will identify the main idea and three supporting details in grade-level text with 80% accuracy in 3 out of 4 trials.',
       baseline: 'Currently identifies main idea with 40% accuracy',
@@ -61,6 +138,7 @@ const GoalWriting: React.FC = () => {
     },
     {
       id: 2,
+      studentName: 'Maria Rodriguez',
       area: 'Social Skills',
       description: 'Student will initiate appropriate peer interactions during unstructured activities at least 4 times per day for 4 consecutive weeks.',
       baseline: 'Currently initiates interactions 1-2 times per day',
@@ -68,74 +146,110 @@ const GoalWriting: React.FC = () => {
       status: 'active',
     },
   ]);
-  
+
   const [showWizard, setShowWizard] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [wizardData, setWizardData] = useState({
-    studentInfo: '',
-    assessmentData: '',
-    goalArea: '',
-    currentPerformance: '',
-    targetBehavior: '',
-    timeframe: '',
-    criteria: '',
+
+  // UPDATED useState for wizardData with ALL new fields
+  const [wizardData, setWizardData] = useState<WizardData>({
+    studentName: '',
+    currentGradeLevel: 'K',
+    schoolName: '',
+    primaryDisability: '',
+    secondaryDisability: '',
+    studentInterestsGeneralInfo: '',
+    englishLearnerStatus: '',
+    previousGoalDomain: '',
+    previousGoalStandardId: '',
+    previousGoalAnnualGoalText: '',
+    previousGoalProgressStatus: '',
+    previousGoalContinuedNeed: '',
+    showPreviousObjectives: false,
+    previousObjective1Text: '',
+    previousObjective1Status: '',
+    previousObjective2Text: '',
+    previousObjective2Status: '',
+    previousObjective3Text: '',
+    previousObjective3Status: '',
+    anecdotalObservationsGE: '',
+    academicStrengthsGeneralInfo: '',
+    areasOfGrowthQualitative: '',
+    benchmarkAssessmentType: '',
+    benchmarkAssessmentOtherName: '',
+    benchmarkDataManualInput: '',
+    nweaRitScore: '',
+    nweaPercentilePeers: '',
+    nweaGrowthPercentile: '',
+    statewideAssessmentType: '',
+    statewideAssessmentScores: '',
+    elpacScores: '',
+    newBaselineDomain: '',
+    newBaselineStandardId: '',
+    newBaselineResultsQuantitative: '',
+    newBaselineAdditionalInfoQualitative: '',
+    newBaselineSupportsToIncreaseAccess: '',
+    accommodations: [],
+    modifications: [],
+    behaviorNeeds: '',
+    behaviorSupports: [],
+    elSupports: '',
+    assistiveTechNeeded: '',
+    assistiveTechRationale: '',
+    blindVisualImpairment: '',
+    deafHardOfHearing: '',
+    behaviorImpedingLearning: '',
+    behaviorInterventionsStrategies: '',
+    draftPresentLevels: '',
+    draftAnnualGoal: '',
+    draftObjective1: '',
+    draftObjective2: '',
+    draftObjective3: '',
+    relatedServiceType: '',
+    relatedServiceOtherName: '',
+    relatedServiceDuration: '',
+    relatedServiceFrequency: '',
+    relatedServiceDelivery: '',
+    relatedServiceLocation: '',
+    relatedServiceComments: '',
+    relatedServiceStartDate: '',
+    relatedServiceEndDate: '',
   });
-  
+
+  // UPDATED wizardSteps array for the new 10-step flow
   const wizardSteps: WizardStep[] = [
-    {
-      id: 0,
-      title: 'Student Information',
-      description: 'Tell us about the student and their current needs',
-      icon: <GoalTargetIcon className="text-green" size={24} />,
-    },
-    {
-      id: 1,
-      title: 'Assessment Data',
-      description: 'Share relevant assessment results and observations',
-      icon: <Brain className="text-green" size={24} />,
-    },
-    {
-      id: 2,
-      title: 'Goal Parameters',
-      description: 'Define the specific area and target behavior',
-      icon: <IEPFileTextIcon className="text-green" size={24} />,
-    },
-    {
-      id: 3,
-      title: 'Success Criteria',
-      description: 'Set measurable criteria and timeline',
-      icon: <Calendar className="text-green" size={24} />,
-    },
-  ];
-  
-  const goalAreas = [
-    'Reading Comprehension',
-    'Written Expression',
-    'Math Calculation',
-    'Math Problem Solving',
-    'Social Skills',
-    'Behavior',
-    'Communication',
-    'Adaptive Skills',
-    'Fine Motor',
-    'Gross Motor',
+    { id: 0, title: 'Student Demographics', description: 'Basic information about the student.', icon: <User className="text-green" size={24} /> },
+    { id: 1, title: 'Previous IEP Goals Review', description: 'Review progress on prior goals.', icon: <BookOpen className="text-green" size={24} /> },
+    { id: 2, title: 'Student Context & Supports', description: 'Gather qualitative information.', icon: <Settings className="text-green" size={24} /> },
+    { id: 3, title: 'Existing Student Data Input', description: 'Input data from various assessments.', icon: <BarChart2 className="text-green" size={24} /> },
+    { id: 4, title: 'New Baseline Data & Analysis', description: 'Input results from new baseline assessments.', icon: <Microscope className="text-green" size={24} /> },
+    { id: 5, title: 'Accommodations & Modifications', description: 'Define supports for the student.', icon: <ShieldCheck className="text-green" size={24} /> },
+    { id: 6, title: 'Special Factors', description: 'Address specific considerations.', icon: <Edit3 className="text-green" size={24} /> },
+    { id: 7, title: 'Draft Present Levels', description: 'AI will help synthesize data into a PLOP.', icon: <IEPFileTextIcon className="text-green" size={24} /> },
+    { id: 8, title: 'Propose IEP Goals & Objectives', description: 'AI will recommend goals.', icon: <GoalTargetIcon className="text-green" size={24} /> },
+    { id: 9, title: 'Related Services', description: 'Document related services.', icon: <Handshake className="text-green" size={24} /> },
   ];
 
+  const gradeOptions = ['K', '1', '2', '3', '4', '5']; // Moved here for renderWizardStep
+
+  // UPDATED handleStartWizard to reset ALL new fields
   const handleStartWizard = () => {
     setShowWizard(true);
     setCurrentStep(0);
     setWizardData({
-      studentInfo: '',
-      assessmentData: '',
-      goalArea: '',
-      currentPerformance: '',
-      targetBehavior: '',
-      timeframe: '',
-      criteria: '',
+      studentName: '', currentGradeLevel: 'K', schoolName: '', primaryDisability: '', secondaryDisability: '', studentInterestsGeneralInfo: '', englishLearnerStatus: '',
+      previousGoalDomain: '', previousGoalStandardId: '', previousGoalAnnualGoalText: '', previousGoalProgressStatus: '', previousGoalContinuedNeed: '', showPreviousObjectives: false, previousObjective1Text: '', previousObjective1Status: '', previousObjective2Text: '', previousObjective2Status: '', previousObjective3Text: '', previousObjective3Status: '',
+      anecdotalObservationsGE: '', academicStrengthsGeneralInfo: '', areasOfGrowthQualitative: '',
+      benchmarkAssessmentType: '', benchmarkAssessmentOtherName: '', benchmarkDataManualInput: '', nweaRitScore: '', nweaPercentilePeers: '', nweaGrowthPercentile: '', statewideAssessmentType: '', statewideAssessmentScores: '', elpacScores: '',
+      newBaselineDomain: '', newBaselineStandardId: '', newBaselineResultsQuantitative: '', newBaselineAdditionalInfoQualitative: '', newBaselineSupportsToIncreaseAccess: '',
+      accommodations: [], modifications: [], behaviorNeeds: '', behaviorSupports: [], elSupports: '',
+      assistiveTechNeeded: '', assistiveTechRationale: '', blindVisualImpairment: '', deafHardOfHearing: '', behaviorImpedingLearning: '', behaviorInterventionsStrategies: '',
+      draftPresentLevels: '', draftAnnualGoal: '', draftObjective1: '', draftObjective2: '', draftObjective3: '',
+      relatedServiceType: '', relatedServiceOtherName: '', relatedServiceDuration: '', relatedServiceFrequency: '', relatedServiceDelivery: '', relatedServiceLocation: '', relatedServiceComments: '', relatedServiceStartDate: '', relatedServiceEndDate: '',
     });
   };
 
   const handleNextStep = () => {
+    // Ensure we don't go beyond the last defined step
     if (currentStep < wizardSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -147,17 +261,19 @@ const GoalWriting: React.FC = () => {
     }
   };
 
+  // handleGenerateGoal will need significant updates later to use new wizardData
   const handleGenerateGoal = () => {
-    // Simulate AI goal generation
+    console.log("Generating goal with data:", wizardData); // Log new data
+    // This is just a placeholder - real goal generation will be much more complex
     const newGoal: Goal = {
       id: goals.length ? Math.max(...goals.map(g => g.id)) + 1 : 1,
-      area: wizardData.goalArea,
-      description: `AI-generated goal based on provided data: ${wizardData.targetBehavior} with ${wizardData.criteria} by ${wizardData.timeframe}.`,
-      baseline: wizardData.currentPerformance,
-      targetDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 6 months from now
+      studentName: wizardData.studentName, // Use new studentName
+      area: wizardData.previousGoalDomain || 'Math', // Example: use a relevant field
+      description: `AI-drafted goal for ${wizardData.studentName}. Focus: ${wizardData.previousGoalDomain || 'General Math Skills'}. (Details to be generated in Step 9)`,
+      baseline: wizardData.newBaselineResultsQuantitative || 'Baseline to be determined from Step 5 data.',
+      targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now
       status: 'draft',
     };
-    
     setGoals([...goals, newGoal]);
     setShowWizard(false);
   };
@@ -169,211 +285,210 @@ const GoalWriting: React.FC = () => {
   const getStatusColor = (status: Goal['status']) => {
     switch (status) {
       case 'active': return 'bg-green text-white';
-      case 'draft': return 'bg-yellow-500 text-black';
+      case 'draft': return 'bg-yellow-400 text-black'; // Adjusted yellow for better contrast
       case 'completed': return 'bg-blue-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      default: return 'bg-gray-400 text-white';
     }
   };
 
   const renderWizardStep = () => {
+    // Ensure currentStep is valid for the new wizardSteps array
+    if (!wizardSteps[currentStep]) {
+        console.error("Invalid currentStep:", currentStep, "wizardSteps length:", wizardSteps.length);
+        return <div>Error: Invalid wizard step. Please restart the wizard.</div>;
+    }
+
     switch (currentStep) {
-      case 0:
+      case 0: // Step 1: Student Demographics
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium mb-2 text-green">
-                Student Information & Current Needs
-              </label>
-              <textarea
-                value={wizardData.studentInfo}
-                onChange={e => setWizardData({...wizardData, studentInfo: e.target.value})}
-                className="w-full p-4 border-2 border-green border-opacity-20 rounded-lg bg-bg-primary focus:outline-none focus:border-green focus:border-opacity-60 transition-all duration-200 h-32"
-                placeholder="Describe the student's current educational needs, strengths, and areas of concern. Include grade level, disability category, and any relevant background information..."
-              />
-            </div>
-          </div>
-        );
-      
-      case 1:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-green">
-                Assessment Data & Observations
-              </label>
-              <textarea
-                value={wizardData.assessmentData}
-                onChange={e => setWizardData({...wizardData, assessmentData: e.target.value})}
-                className="w-full p-4 border-2 border-green border-opacity-20 rounded-lg bg-bg-primary focus:outline-none focus:border-green focus:border-opacity-60 transition-all duration-200 h-32"
-                placeholder="Share relevant assessment results, classroom observations, work samples, or data that will inform goal development..."
-              />
-            </div>
-          </div>
-        );
-      
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-green">Goal Area</label>
-              <select
-                value={wizardData.goalArea}
-                onChange={e => setWizardData({...wizardData, goalArea: e.target.value})}
-                className="w-full p-3 border-2 border-green border-opacity-20 rounded-lg bg-bg-primary focus:outline-none focus:border-green focus:border-opacity-60 transition-all duration-200"
-              >
-                <option value="">Select Goal Area</option>
-                {goalAreas.map(area => (
-                  <option key={area} value={area}>{area}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-2 text-green">
-                Current Performance Level
-              </label>
-              <textarea
-                value={wizardData.currentPerformance}
-                onChange={e => setWizardData({...wizardData, currentPerformance: e.target.value})}
-                className="w-full p-4 border-2 border-green border-opacity-20 rounded-lg bg-bg-primary focus:outline-none focus:border-green focus:border-opacity-60 transition-all duration-200 h-24"
-                placeholder="Describe what the student can currently do in this area..."
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-2 text-green">
-                Target Behavior/Skill
-              </label>
-              <textarea
-                value={wizardData.targetBehavior}
-                onChange={e => setWizardData({...wizardData, targetBehavior: e.target.value})}
-                className="w-full p-4 border-2 border-green border-opacity-20 rounded-lg bg-bg-primary focus:outline-none focus:border-green focus:border-opacity-60 transition-all duration-200 h-24"
-                placeholder="Describe the specific skill or behavior you want the student to achieve..."
-              />
-            </div>
-          </div>
-        );
-      
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-green">
-                Success Criteria
-              </label>
-              <textarea
-                value={wizardData.criteria}
-                onChange={e => setWizardData({...wizardData, criteria: e.target.value})}
-                className="w-full p-4 border-2 border-green border-opacity-20 rounded-lg bg-bg-primary focus:outline-none focus:border-green focus:border-opacity-60 transition-all duration-200 h-24"
-                placeholder="How will success be measured? (e.g., 80% accuracy, 4 out of 5 trials, etc.)"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-2 text-green">
-                Timeframe
+              <label htmlFor="studentName" className="block text-sm font-medium mb-1 text-text-primary">
+                Student Name:
               </label>
               <input
                 type="text"
-                value={wizardData.timeframe}
-                onChange={e => setWizardData({...wizardData, timeframe: e.target.value})}
-                className="w-full p-3 border-2 border-green border-opacity-20 rounded-lg bg-bg-primary focus:outline-none focus:border-green focus:border-opacity-60 transition-all duration-200"
-                placeholder="When should this goal be achieved? (e.g., by the end of the school year, within 6 months)"
+                id="studentName"
+                value={wizardData.studentName}
+                onChange={(e) => setWizardData({ ...wizardData, studentName: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                placeholder="Enter student's full name"
+              />
+            </div>
+            <div>
+              <label htmlFor="currentGradeLevel" className="block text-sm font-medium mb-1 text-text-primary">
+                Current Grade Level:
+              </label>
+              <select
+                id="currentGradeLevel"
+                value={wizardData.currentGradeLevel}
+                onChange={(e) => setWizardData({ ...wizardData, currentGradeLevel: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+              >
+                {gradeOptions.map(grade => (
+                  <option key={grade} value={grade}>{grade}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="schoolName" className="block text-sm font-medium mb-1 text-text-primary">
+                School Name (optional):
+              </label>
+              <input
+                type="text"
+                id="schoolName"
+                value={wizardData.schoolName}
+                onChange={(e) => setWizardData({ ...wizardData, schoolName: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                placeholder="Enter school name"
+              />
+            </div>
+            <div>
+              <label htmlFor="primaryDisability" className="block text-sm font-medium mb-1 text-text-primary">
+                Primary Disability:
+              </label>
+              <input
+                type="text"
+                id="primaryDisability"
+                value={wizardData.primaryDisability}
+                onChange={(e) => setWizardData({ ...wizardData, primaryDisability: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                placeholder="e.g., Autism, Specific Learning Disability"
+              />
+            </div>
+            <div>
+              <label htmlFor="secondaryDisability" className="block text-sm font-medium mb-1 text-text-primary">
+                Secondary Disability (optional):
+              </label>
+              <input
+                type="text"
+                id="secondaryDisability"
+                value={wizardData.secondaryDisability}
+                onChange={(e) => setWizardData({ ...wizardData, secondaryDisability: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                placeholder="Enter secondary disability if applicable"
+              />
+            </div>
+            <div>
+              <label htmlFor="englishLearnerStatus" className="block text-sm font-medium mb-1 text-text-primary">
+                English Learner Status:
+              </label>
+              <select
+                id="englishLearnerStatus"
+                value={wizardData.englishLearnerStatus}
+                onChange={(e) => setWizardData({ ...wizardData, englishLearnerStatus: e.target.value as WizardData['englishLearnerStatus'] })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+              >
+                <option value="">Select Status</option>
+                <option value="ELL">English Language Learner (ELL)</option>
+                <option value="EO">English Only (EO)</option>
+                <option value="RFEP">Redesignated Fluent English Proficient (RFEP)</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="studentInterestsGeneralInfo" className="block text-sm font-medium mb-1 text-text-primary">
+                Student Interests and General Information:
+              </label>
+              <textarea
+                id="studentInterestsGeneralInfo"
+                value={wizardData.studentInterestsGeneralInfo}
+                onChange={(e) => setWizardData({ ...wizardData, studentInterestsGeneralInfo: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Describe student's interests, hobbies, strengths, learning preferences..."
               />
             </div>
           </div>
         );
-      
+      // Placeholder cases for the new steps
+      case 1: return <div>Content for Step 2: Previous IEP Goals Review (Coming Soon)</div>;
+      case 2: return <div>Content for Step 3: Student Context & Supports (Coming Soon)</div>;
+      case 3: return <div>Content for Step 4: Existing Student Data Input (Coming Soon)</div>;
+      case 4: return <div>Content for Step 5: New Baseline Data & Analysis (Coming Soon)</div>;
+      case 5: return <div>Content for Step 6: Accommodations & Modifications (Coming Soon)</div>;
+      case 6: return <div>Content for Step 7: Special Factors (Coming Soon)</div>;
+      case 7: return <div>Content for Step 8: Draft Present Levels (Coming Soon)</div>;
+      case 8: return <div>Content for Step 9: Propose IEP Goals & Objectives (Coming Soon)</div>;
+      case 9: return <div>Content for Step 10: Related Services (Coming Soon)</div>;
       default:
-        return null;
+        return <div>Invalid step or step not yet implemented.</div>;
     }
   };
 
+  // Main component return (non-wizard view) - This part was updated by a previous Bolt prompt
+  // based on your request to simplify the main page.
   if (showWizard) {
+    // This is the existing wizard shell from your code, now driven by the new wizardSteps and currentStep
     return (
       <div className="animate-fade-in">
         <div className="max-w-4xl mx-auto">
-          {/* Wizard Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-3xl font-medium">AI-Assisted Goal Creation</h1>
+              <h1 className="text-3xl font-medium">AI-Assisted Goal Creation</h1> {/* This title can be updated if needed */}
               <button
                 onClick={() => setShowWizard(false)}
                 className="p-2 hover:bg-bg-secondary rounded-lg transition-colors"
+                aria-label="Close Wizard"
               >
                 ✕
               </button>
             </div>
-            
-            {/* Progress Bar */}
-            <div className="flex items-center space-x-4 mb-6">
+            <div className="flex items-center space-x-2 sm:space-x-4 mb-6 overflow-x-auto pb-2">
               {wizardSteps.map((step, index) => (
-                <div key={step.id} className="flex items-center">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${
-                    index <= currentStep 
-                      ? 'bg-green text-white border-green' 
-                      : 'border-border text-text-secondary'
+                <div key={step.id} className="flex items-center flex-shrink-0">
+                  <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-all duration-300 ${
+                    index === currentStep ? 'bg-green text-white border-green scale-110' : 
+                    index < currentStep ? 'bg-green-200 text-green border-green-200' : 
+                    'border-border text-text-secondary'
                   }`}>
-                    {index < currentStep ? (
-                      <Check size={20} />
-                    ) : (
-                      <span className="text-sm font-medium">{index + 1}</span>
-                    )}
+                    {index < currentStep ? <Check size={16} smSize={20} /> : <span className="text-xs sm:text-sm font-medium">{index + 1}</span>}
+                  </div>
+                  <div className="ml-2 sm:ml-3 text-left min-w-max">
+                     <p className={`text-xs sm:text-sm font-medium truncate ${index === currentStep ? 'text-green' : 'text-text-secondary'}`}>{step.title}</p>
                   </div>
                   {index < wizardSteps.length - 1 && (
-                    <div className={`w-16 h-0.5 mx-2 transition-all duration-300 ${
-                      index < currentStep ? 'bg-green' : 'bg-border'
-                    }`} />
+                     <div className={`hidden sm:block w-8 sm:w-12 h-0.5 mx-2 sm:mx-3 transition-all duration-300 ${index < currentStep ? 'bg-green' : 'bg-border'}`} />
                   )}
                 </div>
               ))}
             </div>
           </div>
-
-          {/* Wizard Content */}
           <div className="card">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
-                {wizardSteps[currentStep].icon}
-                <h2 className="text-2xl font-medium">{wizardSteps[currentStep].title}</h2>
+                {wizardSteps[currentStep]?.icon || <Sparkles className="text-green" size={24} />} {/* Fallback icon */}
+                <h2 className="text-2xl font-medium">{wizardSteps[currentStep]?.title || 'Loading Step...'}</h2>
               </div>
-              <p className="text-text-secondary">{wizardSteps[currentStep].description}</p>
+              <p className="text-text-secondary">{wizardSteps[currentStep]?.description || 'Please wait...'}</p>
             </div>
-
             <div className="min-h-[300px]">
               {renderWizardStep()}
             </div>
-
-            {/* Navigation */}
-            <div className="flex justify-between pt-6 border-t border-border">
+            <div className="flex justify-between items-center pt-6 border-t border-border mt-6">
               <button
                 onClick={handlePrevStep}
                 disabled={currentStep === 0}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                  currentStep === 0
-                    ? 'text-text-secondary cursor-not-allowed'
-                    : 'text-green hover:bg-green hover:bg-opacity-10 border border-green border-opacity-20'
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  currentStep === 0 ? 'text-text-disabled' : 'text-green hover:bg-green hover:bg-opacity-10 border border-green border-opacity-30'
                 }`}
               >
-                <ArrowLeft size={20} />
+                <ArrowLeft size={18} />
                 Previous
               </button>
-
               {currentStep === wizardSteps.length - 1 ? (
                 <button
-                  onClick={handleGenerateGoal}
-                  className="flex items-center gap-2 px-8 py-3 bg-green text-white rounded-lg font-medium hover:bg-green hover:bg-opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  onClick={handleGenerateGoal} // This will eventually be "Save/Finalize IEP" or similar
+                  className="flex items-center gap-2 px-7 py-2.5 bg-green text-white rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200 shadow-md hover:shadow-lg"
                 >
-                  <Sparkles size={20} />
-                  Generate Goal
+                  <Sparkles size={18} />
+                  Finalize & Generate Documents (Placeholder)
                 </button>
               ) : (
                 <button
                   onClick={handleNextStep}
-                  className="flex items-center gap-2 px-6 py-3 bg-green text-white rounded-lg font-medium hover:bg-green hover:bg-opacity-90 transition-all duration-200"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-green text-white rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200"
                 >
                   Next
-                  <ArrowRight size={20} />
+                  <ArrowRight size={18} />
                 </button>
               )}
             </div>
@@ -383,113 +498,79 @@ const GoalWriting: React.FC = () => {
     );
   }
 
+  // Non-wizard view (main page of the GoalWriting/IEP Development Studio)
   return (
     <div className="animate-fade-in">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-medium">Goal Writing</h1>
-        <div className="flex gap-3">
-          <button 
-            onClick={() => {/* Handle manual goal creation */}}
-            className="flex items-center gap-2 px-4 py-2 border border-green border-opacity-20 text-green rounded-lg hover:bg-green hover:bg-opacity-10 transition-all duration-200"
+      <div className="flex justify-between items-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-medium tracking-tight">IEP Development Studio</h1>
+        {/* Removed Manual Goal button as per previous request */}
+      </div>
+
+      <div className="card mb-8 bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm hover:shadow-lg">
+        <div className="text-center py-10 sm:py-16 px-4">
+          <div className="inline-block p-3 sm:p-4 bg-green/10 rounded-full mb-5 sm:mb-6">
+            <Sparkles className="text-green" size={32} sm:size={48} />
+          </div>
+          <h2 className="text-xl sm:text-3xl font-semibold mb-3 sm:mb-4">AI-Assisted IEP Development</h2>
+          <p className="text-text-secondary text-sm sm:text-lg mb-6 sm:mb-8 max-w-xl sm:max-w-2xl mx-auto leading-relaxed">
+            Use our AI-powered assistant to guide you through creating comprehensive, measurable Present Levels, Baselines, and IEP Goals for your students.
+          </p>
+          <button
+            onClick={handleStartWizard}
+            className="inline-flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-3.5 bg-green text-white rounded-lg sm:rounded-xl font-medium text-base sm:text-lg hover:bg-opacity-90 transition-all duration-200 shadow-lg hover:shadow-green/30 transform hover:scale-105"
           >
-            <Plus size={18} />
-            Manual Goal
+            <Brain size={20} sm:size={24} />
+            Create New Student IEP Goals
+            <ArrowRight size={20} sm:size={24} />
           </button>
         </div>
       </div>
 
-      {/* Hero Section */}
-      <div className="card mb-8 bg-gradient-to-br from-green from-opacity-5 to-green to-opacity-10 border-green border-opacity-20">
-        <div className="text-center py-12">
-          <div className="flex justify-center mb-6">
-            <div className="p-4 bg-green bg-opacity-10 rounded-full">
-              <Sparkles className="text-green" size={48} />
-            </div>
-          </div>
-          <h2 className="text-3xl font-medium mb-4">Create Goals with AI Assistance</h2>
-          <p className="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">
-            Let our AI help you craft comprehensive, measurable IEP goals based on student data and best practices. 
-            Simply provide information about your student, and we'll guide you through the process.
-          </p>
-          <button
-            onClick={handleStartWizard}
-            className="inline-flex items-center gap-3 px-8 py-4 bg-green text-white rounded-xl font-medium text-lg hover:bg-green hover:bg-opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-          >
-            <Brain size={24} />
-            Start New AI-Assisted Goal Process
-            <ArrowRight size={24} />
-          </button>
+      <div className="card bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
+          <Lightbulb className="text-green" size={20} sm:size={22} />
+          <h2 className="text-xl sm:text-2xl font-medium">SMART Goal Writing Tips</h2>
         </div>
-      </div>
-      
-      {/* Current Goals */}
-      <div className="card">
-        <div className="flex items-center gap-2 mb-6">
-          <GoalTargetIcon className="text-green" size={24} />
-          <h2 className="text-2xl font-medium">Current IEP Goals</h2>
-        </div>
-        
-        {goals.length > 0 ? (
-          <div className="space-y-4">
-            {goals.map(goal => (
-              <div key={goal.id} className="border border-border rounded-xl p-6 hover:border-green hover:border-opacity-40 transition-all duration-200 hover:shadow-md">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 bg-green bg-opacity-10 text-green text-sm rounded-full font-medium">
-                      {goal.area}
-                    </span>
-                    <span className={`px-3 py-1 text-xs rounded-full font-medium ${getStatusColor(goal.status)}`}>
-                      {goal.status.charAt(0).toUpperCase() + goal.status.slice(1)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      className="p-2 hover:bg-bg-secondary rounded-lg transition-colors" 
-                      aria-label="Edit goal"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                    </button>
-                    <button 
-                      className="p-2 hover:bg-bg-secondary rounded-lg transition-colors text-red-500" 
-                      onClick={() => handleDeleteGoal(goal.id)}
-                      aria-label="Delete goal"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+          {[
+            { letter: 'S', term: 'Specific', desc: 'Clearly define what needs to be accomplished. Avoid vague language and be precise about the expected behavior or skill.' },
+            { letter: 'M', term: 'Measurable', desc: 'How will you track progress and know when the goal is met? Include specific criteria like percentages or frequency.' },
+            { letter: 'A', term: 'Achievable', desc: 'Is the goal realistic given the student\'s current abilities and expected growth? Set challenging but attainable targets.' },
+            { letter: 'R', term: 'Relevant', desc: 'Does the goal address the student\'s key needs and align with curriculum expectations and life skills?' },
+            { letter: 'T', term: 'Time-bound', desc: 'What is the target date for achieving this goal? Establish clear timelines for assessment and review.' },
+          ].map(tip => (
+            <div key={tip.letter} className="bg-bg-primary rounded-lg p-4 sm:p-5 border border-border hover:border-green/50 transition-all duration-200 shadow-sm hover:shadow-md">
+              <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0">
+                  {tip.letter}
                 </div>
-                
-                <div className="mb-4">
-                  <h3 className="font-medium text-lg mb-2">Goal #{goal.id}</h3>
-                  <p className="text-text-secondary leading-relaxed">{goal.description}</p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-bg-secondary rounded-lg">
-                    <span className="font-medium text-green">Baseline:</span>
-                    <p className="text-sm mt-1">{goal.baseline}</p>
-                  </div>
-                  <div className="p-4 bg-bg-secondary rounded-lg">
-                    <span className="font-medium text-green">Target Date:</span>
-                    <p className="text-sm mt-1">{new Date(goal.targetDate).toLocaleDateString()}</p>
-                  </div>
-                </div>
+                <h3 className="font-semibold text-green text-sm sm:text-base">{tip.term}</h3>
               </div>
+              <p className="text-text-secondary text-xs sm:text-sm leading-normal">{tip.desc}</p>
+            </div>
+          ))}
+        </div>
+         <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-bg-secondary rounded-lg border border-border">
+          <h3 className="font-semibold text-green mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            Additional Best Practices
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+            {[
+              "Use positive language focusing on what the student will do",
+              "Include conditions under which the skill will be performed",
+              "Consider the student's learning style and preferences",
+              "Align goals with state standards when appropriate",
+              "Ensure goals are functional and meaningful to the student",
+              "Plan for regular progress monitoring and data collection"
+            ].map(practice => (
+               <p key={practice} className="flex items-start gap-2 text-xs sm:text-sm text-text-secondary">
+                  <span className="w-1.5 h-1.5 bg-green rounded-full mt-[0.3em] sm:mt-[0.4em] flex-shrink-0"></span>
+                  <span>{practice}</span>
+               </p>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-12 text-text-secondary">
-            <GoalTargetIcon size={48} className="mx-auto mb-4 opacity-30" />
-            <p className="text-lg mb-4">No goals have been created yet</p>
-            <button 
-              onClick={handleStartWizard}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-green text-white rounded-lg font-medium hover:bg-green hover:bg-opacity-90 transition-all duration-200"
-            >
-              <Sparkles size={20} />
-              Create Your First Goal
-            </button>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
