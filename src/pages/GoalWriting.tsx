@@ -1,6 +1,35 @@
 import React, { useState } from 'react';
-import { Target, Plus, Save, Trash2, ArrowRight, ArrowLeft, Check, Sparkles, Brain, FileText, Calendar } from 'lucide-react';
-
+import {
+  User, // For Step 1
+  BookOpen, // For Step 2
+  Settings, // For Step 3
+  BarChart2, // For Step 4
+  Microscope, // For Step 5
+  ShieldCheck, // For Step 6
+  Edit3, // For Step 7
+  FileText as IEPFileTextIcon, // For Step 8 (Present Levels)
+  Target as GoalTargetIcon, // For Step 9 (Goal Proposal) & main page
+  Handshake, // For Step 10
+  Lightbulb, // For SMART tips
+  Brain, // For hero button & old wizard
+  Sparkles, // For hero button & old wizard
+  Check,
+  ArrowLeft,
+  ArrowRight,
+  Calendar, // Old wizard icon
+  Plus,
+  Save, // Old component icon, not used in wizard
+  Trash2,
+} from 'lucide-react';
+interface WizardData {
+  // Step 1: Student Demographics
+  studentName: string;
+  currentGradeLevel: string;
+  schoolName: string;
+  primaryDisability: string;
+  secondaryDisability: string;
+  studentInterestsGeneralInfo: string;
+  englishLearnerStatus: 'ELL' | 'EO' | 'RFEP' | '';
 interface Goal {
   id: number;
   area: string;
