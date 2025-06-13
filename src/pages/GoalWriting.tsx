@@ -21,6 +21,7 @@ import {
   Save, // Old component icon, not used in wizard
   Trash2,
 } from 'lucide-react';
+
 interface WizardData {
   // Step 1: Student Demographics
   studentName: string;
@@ -30,6 +31,8 @@ interface WizardData {
   secondaryDisability: string;
   studentInterestsGeneralInfo: string;
   englishLearnerStatus: 'ELL' | 'EO' | 'RFEP' | '';
+}
+
 interface Goal {
   id: number;
   area: string;
@@ -83,7 +86,7 @@ const GoalWriting: React.FC = () => {
       id: 0,
       title: 'Student Information',
       description: 'Tell us about the student and their current needs',
-      icon: <Target className="text-green\" size={24} />,
+      icon: <GoalTargetIcon className="text-green" size={24} />,
     },
     {
       id: 1,
@@ -95,7 +98,7 @@ const GoalWriting: React.FC = () => {
       id: 2,
       title: 'Goal Parameters',
       description: 'Define the specific area and target behavior',
-      icon: <FileText className="text-green\" size={24} />,
+      icon: <IEPFileTextIcon className="text-green" size={24} />,
     },
     {
       id: 3,
@@ -422,7 +425,7 @@ const GoalWriting: React.FC = () => {
       {/* Current Goals */}
       <div className="card">
         <div className="flex items-center gap-2 mb-6">
-          <Target className="text-green" size={24} />
+          <GoalTargetIcon className="text-green" size={24} />
           <h2 className="text-2xl font-medium">Current IEP Goals</h2>
         </div>
         
@@ -476,7 +479,7 @@ const GoalWriting: React.FC = () => {
           </div>
         ) : (
           <div className="text-center py-12 text-text-secondary">
-            <Target size={48} className="mx-auto mb-4 opacity-30" />
+            <GoalTargetIcon size={48} className="mx-auto mb-4 opacity-30" />
             <p className="text-lg mb-4">No goals have been created yet</p>
             <button 
               onClick={handleStartWizard}
