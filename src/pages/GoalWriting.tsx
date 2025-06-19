@@ -16,12 +16,14 @@ import {
   Check, // For Wizard progress
   ArrowLeft, // For Wizard navigation
   ArrowRight, // For Wizard navigation
+  Plus, // For adding new areas
+  X, // For removing areas
 } from 'lucide-react';
 
 // Interface for individual goals (remains from your original, studentName added)
 interface Goal {
   id: number;
-  studentName?: string; // <<<< THIS LINE IS ADDED/MODIFIED
+  studentName?: string; // Made optional for flexibility
   area: string;
   description: string;
   baseline: string;
@@ -38,12 +40,14 @@ interface WizardStep {
 }
 
 interface StrengthGrowthEntry {
+  id: string;
   mainDomain: string; // e.g., "Math", "Reading"
   ccssDomainsStatus: Array<{ domainName: string; status: 'strength' | 'growth' | 'unselected' }>;
   strengthsAnecdotal: string;
   growthAreasAnecdotal: string;
 }
 
+// NEW/UPDATED WizardData Interface for all 10 steps
 interface WizardData {
   // Step 1: Student Demographics
   studentName: string;
@@ -68,12 +72,12 @@ interface WizardData {
   previousObjective3Text: string;
   previousObjective3Status: 'met' | 'not_met' | 'partially_met' | '';
 
-  // Step 3: Student Context & Supports
-  anecdotalObservationsGE: string;
-  academicStrengthsGeneralInfo: string;
-  areasOfGrowthQualitative: string;
+  // Step 3: Qualitative Student Data
+  strengthGrowthEntries: StrengthGrowthEntry[];
+  studentPerformanceInGE: string;
+  generalEducationTeacherInput: string;
 
-  // Step 4: Existing Student Data Input
+  // Step 4: Quantitative Student Data
   benchmarkAssessmentType: 'NWEA' | 'Curriculum-Based' | 'Benchmark' | 'Other' | '';
   benchmarkAssessmentOtherName: string;
   benchmarkDataManualInput: string;
@@ -84,7 +88,7 @@ interface WizardData {
   statewideAssessmentScores: string;
   elpacScores: string;
 
-  // Step 5: New Baseline Data Analysis
+  // Step 5: Data Analysis
   newBaselineDomain: string;
   newBaselineStandardId: string;
   newBaselineResultsQuantitative: string;
@@ -173,9 +177,9 @@ const GoalWriting: React.FC = () => {
     previousObjective2Status: '',
     previousObjective3Text: '',
     previousObjective3Status: '',
-    anecdotalObservationsGE: '',
-    academicStrengthsGeneralInfo: '',
-    areasOfGrowthQualitative: '',
+    strengthGrowthEntries: [],
+    studentPerformanceInGE: '',
+    generalEducationTeacherInput: '',
     benchmarkAssessmentType: '',
     benchmarkAssessmentOtherName: '',
     benchmarkDataManualInput: '',
@@ -232,13 +236,173 @@ const GoalWriting: React.FC = () => {
   ];
 
   const gradeOptions = ['K', '1', '2', '3', '4', '5'];
-  const MATH_DOMAINS_BY_GRADE: Record<string, string[]> = {
-    'K': ["Counting & Cardinality", "Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Measurement & Data", "Geometry"],
-    '1': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Measurement & Data", "Geometry"],
-    '2': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Measurement & Data", "Geometry"],
-    '3': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Number & Operations - Fractions", "Measurement & Data", "Geometry"],
-    '4': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Number & Operations - Fractions", "Measurement & Data", "Geometry"],
-    '5': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Number & Operations - Fractions", "Measurement & Data", "Geometry"]
+  
+  // Domain mappings for different areas
+  const DOMAIN_MAPPINGS: Record<string, Record<string, string[]>> = {
+    'Math': {
+      'K': ["Counting & Cardinality", "Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Measurement & Data", "Geometry"],
+      '1': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Measurement & Data", "Geometry"],
+      '2': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Measurement & Data", "Geometry"],
+      '3': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Number & Operations - Fractions", "Measurement & Data", "Geometry"],
+      '4': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Number & Operations - Fractions", "Measurement & Data", "Geometry"],
+      '5': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Number & Operations - Fractions", "Measurement & Data", "Geometry"]
+    },
+    'Reading': {
+      'K': ["Phonological Awareness", "Print Concepts", "Phonics & Word Recognition", "Fluency", "Comprehension"],
+      '1': ["Phonics & Word Recognition", "Fluency", "Comprehension", "Vocabulary"],
+      '2': ["Phonics & Word Recognition", "Fluency", "Comprehension", "Vocabulary"],
+      '3': ["Phonics & Word Recognition", "Fluency", "Comprehension", "Vocabulary", "Text Analysis"],
+      '4': ["Phonics & Word Recognition", "Fluency", "Comprehension", "Vocabulary", "Text Analysis"],
+      '5': ["Phonics & Word Recognition", "Fluency", "Comprehension", "Vocabulary", "Text Analysis"]
+    },
+    'Writing': {
+      'K': ["Text Types & Purposes", "Production & Distribution", "Research", "Language Conventions"],
+      '1': ["Text Types & Purposes", "Production & Distribution", "Research", "Language Conventions"],
+      '2': ["Text Types & Purposes", "Production & Distribution", "Research", "Language Conventions"],
+      '3': ["Text Types & Purposes", "Production & Distribution", "Research", "Language Conventions"],
+      '4': ["Text Types & Purposes", "Production & Distribution", "Research", "Language Conventions"],
+      '5': ["Text Types & Purposes", "Production & Distribution", "Research", "Language Conventions"]
+    },
+    'Social Emotional/Behavioral': {
+      'K': ["Self-Awareness", "Self-Management", "Social Awareness", "Relationship Skills", "Responsible Decision-Making"],
+      '1': ["Self-Awareness", "Self-Management", "Social Awareness", "Relationship Skills", "Responsible Decision-Making"],
+      '2': ["Self-Awareness", "Self-Management", "Social Awareness", "Relationship Skills", "Responsible Decision-Making"],
+      '3': ["Self-Awareness", "Self-Management", "Social Awareness", "Relationship Skills", "Responsible Decision-Making"],
+      '4': ["Self-Awareness", "Self-Management", "Social Awareness", "Relationship Skills", "Responsible Decision-Making"],
+      '5': ["Self-Awareness", "Self-Management", "Social Awareness", "Relationship Skills", "Responsible Decision-Making"]
+    },
+    'Vocational': {
+      'K': ["Work Habits", "Following Directions", "Task Completion", "Social Skills"],
+      '1': ["Work Habits", "Following Directions", "Task Completion", "Social Skills"],
+      '2': ["Work Habits", "Following Directions", "Task Completion", "Social Skills", "Basic Job Skills"],
+      '3': ["Work Habits", "Following Directions", "Task Completion", "Social Skills", "Basic Job Skills"],
+      '4': ["Work Habits", "Following Directions", "Task Completion", "Social Skills", "Basic Job Skills", "Career Exploration"],
+      '5': ["Work Habits", "Following Directions", "Task Completion", "Social Skills", "Basic Job Skills", "Career Exploration"]
+    },
+    'Adaptive/Daily Living Skills': {
+      'K': ["Personal Care", "Safety Skills", "Basic Communication", "Following Routines"],
+      '1': ["Personal Care", "Safety Skills", "Basic Communication", "Following Routines", "Money Concepts"],
+      '2': ["Personal Care", "Safety Skills", "Basic Communication", "Following Routines", "Money Concepts"],
+      '3': ["Personal Care", "Safety Skills", "Communication", "Following Routines", "Money Skills", "Time Management"],
+      '4': ["Personal Care", "Safety Skills", "Communication", "Following Routines", "Money Skills", "Time Management"],
+      '5': ["Personal Care", "Safety Skills", "Communication", "Following Routines", "Money Skills", "Time Management", "Community Skills"]
+    },
+    'Communication': {
+      'K': ["Receptive Language", "Expressive Language", "Social Communication", "Articulation"],
+      '1': ["Receptive Language", "Expressive Language", "Social Communication", "Articulation"],
+      '2': ["Receptive Language", "Expressive Language", "Social Communication", "Articulation", "Pragmatics"],
+      '3': ["Receptive Language", "Expressive Language", "Social Communication", "Articulation", "Pragmatics"],
+      '4': ["Receptive Language", "Expressive Language", "Social Communication", "Articulation", "Pragmatics"],
+      '5': ["Receptive Language", "Expressive Language", "Social Communication", "Articulation", "Pragmatics"]
+    },
+    'Fine/Gross Motor': {
+      'K': ["Fine Motor Skills", "Gross Motor Skills", "Motor Planning", "Sensory Processing"],
+      '1': ["Fine Motor Skills", "Gross Motor Skills", "Motor Planning", "Sensory Processing"],
+      '2': ["Fine Motor Skills", "Gross Motor Skills", "Motor Planning", "Sensory Processing"],
+      '3': ["Fine Motor Skills", "Gross Motor Skills", "Motor Planning", "Sensory Processing"],
+      '4': ["Fine Motor Skills", "Gross Motor Skills", "Motor Planning", "Sensory Processing"],
+      '5': ["Fine Motor Skills", "Gross Motor Skills", "Motor Planning", "Sensory Processing"]
+    }
+  };
+
+  const MAIN_DOMAIN_OPTIONS = [
+    'Reading',
+    'Writing', 
+    'Math',
+    'Social Emotional/Behavioral',
+    'Vocational',
+    'Adaptive/Daily Living Skills',
+    'Communication',
+    'Fine/Gross Motor'
+  ];
+
+  // Helper functions for Step 3
+  const addNewStrengthGrowthEntry = () => {
+    const newEntry: StrengthGrowthEntry = {
+      id: Date.now().toString(),
+      mainDomain: '',
+      ccssDomainsStatus: [],
+      strengthsAnecdotal: '',
+      growthAreasAnecdotal: ''
+    };
+    setWizardData({
+      ...wizardData,
+      strengthGrowthEntries: [...wizardData.strengthGrowthEntries, newEntry]
+    });
+  };
+
+  const removeStrengthGrowthEntry = (entryId: string) => {
+    setWizardData({
+      ...wizardData,
+      strengthGrowthEntries: wizardData.strengthGrowthEntries.filter(entry => entry.id !== entryId)
+    });
+  };
+
+  const updateStrengthGrowthEntry = (entryId: string, updates: Partial<StrengthGrowthEntry>) => {
+    setWizardData({
+      ...wizardData,
+      strengthGrowthEntries: wizardData.strengthGrowthEntries.map(entry =>
+        entry.id === entryId ? { ...entry, ...updates } : entry
+      )
+    });
+  };
+
+  const handleDomainSelection = (entryId: string, selectedDomain: string) => {
+    const domains = DOMAIN_MAPPINGS[selectedDomain]?.[wizardData.currentGradeLevel] || [];
+    const ccssDomainsStatus = domains.map(domain => ({
+      domainName: domain,
+      status: 'unselected' as const
+    }));
+    
+    updateStrengthGrowthEntry(entryId, {
+      mainDomain: selectedDomain,
+      ccssDomainsStatus,
+      strengthsAnecdotal: '',
+      growthAreasAnecdotal: ''
+    });
+  };
+
+  const toggleDomainStatus = (entryId: string, domainName: string) => {
+    const entry = wizardData.strengthGrowthEntries.find(e => e.id === entryId);
+    if (!entry) return;
+
+    const updatedDomains = entry.ccssDomainsStatus.map(domain => {
+      if (domain.domainName === domainName) {
+        const nextStatus = domain.status === 'unselected' ? 'strength' : 
+                          domain.status === 'strength' ? 'growth' : 'unselected';
+        return { ...domain, status: nextStatus };
+      }
+      return domain;
+    });
+
+    updateStrengthGrowthEntry(entryId, { ccssDomainsStatus: updatedDomains });
+  };
+
+  const getAnecdotalPlaceholder = (domain: string, type: 'strengths' | 'growth') => {
+    const examples = {
+      'Math': {
+        strengths: 'e.g., "Student demonstrates strong number sense when working with manipulatives, can count to 20 with accuracy, shows understanding of one-to-one correspondence"',
+        growth: 'e.g., "Student struggles with number recognition beyond 10, needs support with basic addition concepts, requires visual aids for problem solving"'
+      },
+      'Reading': {
+        strengths: 'e.g., "Student shows strong phonemic awareness, can identify beginning sounds, demonstrates good listening comprehension when text is read aloud"',
+        growth: 'e.g., "Student needs support with letter-sound correspondence, struggles with sight word recognition, requires assistance with reading fluency"'
+      },
+      'Writing': {
+        strengths: 'e.g., "Student can form most letters correctly, shows creativity in storytelling, willing to attempt writing tasks"',
+        growth: 'e.g., "Student needs support with spelling patterns, struggles with sentence structure, requires assistance with organizing ideas"'
+      },
+      'Social Emotional/Behavioral': {
+        strengths: 'e.g., "Student shows empathy toward peers, follows classroom routines well, demonstrates good self-regulation during preferred activities"',
+        growth: 'e.g., "Student needs support with conflict resolution, struggles with transitions, requires reminders for appropriate social interactions"'
+      },
+      'Communication': {
+        strengths: 'e.g., "Student uses gestures effectively to communicate, shows good receptive language skills, attempts verbal communication"',
+        growth: 'e.g., "Student needs support with expressive language, struggles with articulation of certain sounds, requires assistance with social communication"'
+      }
+    };
+    
+    return examples[domain as keyof typeof examples]?.[type] || `Describe ${type} in ${domain}...`;
   };
 
   // UPDATED handleStartWizard to reset ALL new fields
@@ -248,7 +412,7 @@ const GoalWriting: React.FC = () => {
     setWizardData({
       studentName: '', currentGradeLevel: 'K', schoolName: '', primaryDisability: '', secondaryDisability: '', studentInterestsGeneralInfo: '', englishLearnerStatus: '',
       previousGoalDomain: '', previousGoalStandardId: '', previousGoalAnnualGoalText: '', previousGoalProgressStatus: '', previousGoalContinuedNeed: '', showPreviousObjectives: false, previousObjective1Text: '', previousObjective1Status: '', previousObjective2Text: '', previousObjective2Status: '', previousObjective3Text: '', previousObjective3Status: '',
-      anecdotalObservationsGE: '', academicStrengthsGeneralInfo: '', areasOfGrowthQualitative: '',
+      strengthGrowthEntries: [], studentPerformanceInGE: '', generalEducationTeacherInput: '',
       benchmarkAssessmentType: '', benchmarkAssessmentOtherName: '', benchmarkDataManualInput: '', nweaRitScore: '', nweaPercentilePeers: '', nweaGrowthPercentile: '', statewideAssessmentType: '', statewideAssessmentScores: '', elpacScores: '',
       newBaselineDomain: '', newBaselineStandardId: '', newBaselineResultsQuantitative: '', newBaselineAdditionalInfoQualitative: '', newBaselineSupportsToIncreaseAccess: '',
       accommodations: [], modifications: [], behaviorNeeds: '', behaviorSupports: [], elSupports: '',
@@ -550,8 +714,145 @@ const GoalWriting: React.FC = () => {
             </div>
           </div>
         );
+      case 2: // Step 3: Qualitative Student Data
+        return (
+          <div className="space-y-8">
+            {/* Student Strengths and Areas of Growth Section */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-text-primary">Student Strengths and Areas of Growth</h3>
+                <button
+                  onClick={addNewStrengthGrowthEntry}
+                  className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-lg hover:bg-opacity-90 transition-colors"
+                >
+                  <Plus size={16} />
+                  Add Area
+                </button>
+              </div>
+
+              {wizardData.strengthGrowthEntries.length === 0 && (
+                <div className="text-center py-8 text-text-secondary border border-border rounded-lg bg-bg-secondary">
+                  <p>No areas added yet. Click "Add Area" to start documenting student strengths and growth areas.</p>
+                </div>
+              )}
+
+              {wizardData.strengthGrowthEntries.map((entry) => (
+                <div key={entry.id} className="border border-border rounded-lg p-6 bg-bg-primary space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-md font-medium text-text-primary">Area Assessment</h4>
+                    <button
+                      onClick={() => removeStrengthGrowthEntry(entry.id)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      aria-label="Remove this area"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  {/* Domain Selection Dropdown */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-text-primary">
+                      Select Domain Area:
+                    </label>
+                    <select
+                      value={entry.mainDomain}
+                      onChange={(e) => handleDomainSelection(entry.id, e.target.value)}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                    >
+                      <option value="">Choose an area...</option>
+                      {MAIN_DOMAIN_OPTIONS.map(domain => (
+                        <option key={domain} value={domain}>{domain}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* CCSS Domain Boxes */}
+                  {entry.mainDomain && entry.ccssDomainsStatus.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium mb-3 text-text-primary">
+                        Click once for Strength (green), twice for Growth Area (orange):
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {entry.ccssDomainsStatus.map((domain) => (
+                          <button
+                            key={domain.domainName}
+                            onClick={() => toggleDomainStatus(entry.id, domain.domainName)}
+                            className={`p-3 rounded-lg border-2 text-sm font-medium transition-all text-left ${
+                              domain.status === 'strength' 
+                                ? 'bg-green text-white border-green' 
+                                : domain.status === 'growth'
+                                ? 'bg-orange-500 text-white border-orange-500'
+                                : 'bg-bg-secondary border-border text-text-primary hover:border-green'
+                            }`}
+                          >
+                            {domain.domainName}
+                            {domain.status === 'strength' && <span className="ml-2">✓</span>}
+                            {domain.status === 'growth' && <span className="ml-2">⚠</span>}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Anecdotal Data Text Areas */}
+                  {entry.mainDomain && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-text-primary">
+                          Anecdotal Data - Strengths in {entry.mainDomain}:
+                        </label>
+                        <textarea
+                          value={entry.strengthsAnecdotal}
+                          onChange={(e) => updateStrengthGrowthEntry(entry.id, { strengthsAnecdotal: e.target.value })}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                          placeholder={getAnecdotalPlaceholder(entry.mainDomain, 'strengths')}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-text-primary">
+                          Anecdotal Data - Areas of Growth in {entry.mainDomain}:
+                        </label>
+                        <textarea
+                          value={entry.growthAreasAnecdotal}
+                          onChange={(e) => updateStrengthGrowthEntry(entry.id, { growthAreasAnecdotal: e.target.value })}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                          placeholder={getAnecdotalPlaceholder(entry.mainDomain, 'growth')}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Student Performance in General Education Section */}
+            <div className="pt-6 border-t border-border">
+              <h3 className="text-lg font-semibold text-text-primary mb-4">Student Performance in General Education</h3>
+              <div>
+                <textarea
+                  value={wizardData.studentPerformanceInGE}
+                  onChange={(e) => setWizardData({ ...wizardData, studentPerformanceInGE: e.target.value })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-40"
+                  placeholder="e.g., 'Student participates in grade-level math instruction with support. Requires visual aids and manipulatives to access content. Shows engagement during small group activities but struggles with independent work completion. Needs frequent breaks and redirection to maintain focus during whole group instruction.'"
+                />
+              </div>
+            </div>
+
+            {/* General Education Teacher Input Section */}
+            <div className="pt-6 border-t border-border">
+              <h3 className="text-lg font-semibold text-text-primary mb-4">General Education Teacher Input</h3>
+              <div>
+                <textarea
+                  value={wizardData.generalEducationTeacherInput}
+                  onChange={(e) => setWizardData({ ...wizardData, generalEducationTeacherInput: e.target.value })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-40"
+                  placeholder="e.g., 'Teacher reports that student works well with peers and shows strong effort in all subjects. Student benefits from preferential seating and visual schedules. Challenges include completing multi-step directions and staying organized with materials. Student responds well to positive reinforcement and clear expectations.'"
+                />
+              </div>
+            </div>
+          </div>
+        );
       // Placeholder cases for the remaining steps
-      case 2: return <div>Content for Step 3: Qualitative Student Data (Coming Soon)</div>;
       case 3: return <div>Content for Step 4: Quantitative Student Data (Coming Soon)</div>;
       case 4: return <div>Content for Step 5: Data Analysis (Coming Soon)</div>;
       case 5: return <div>Content for Step 6: Student Accommodations and Supports (Coming Soon)</div>;
