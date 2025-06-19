@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import {
- import React, { useState } from 'react'; // Your existing React import
-import {
   User, // For Step 1 Icon
   BookOpen, // For Step 2 Icon
   Settings, // For Step 3 Icon
@@ -11,15 +9,13 @@ import {
   Edit3, // For Step 7 Icon
   FileText as IEPFileTextIcon, // For Step 8 Icon (Present Levels) - aliased
   Target as GoalTargetIcon, // For Step 9 Icon (Goal Proposal) - aliased, also used on main page
-  Handshake, //You For Step 10 Icon
+  Handshake, // For Step 10 Icon
   Lightbulb, // For SMART tips on main page
-  Brain, // For Hero button're right to push for clarity on this crucial "manual setup" step! I on main page & old wizard icon
+  Brain, // For Hero button on main page & old wizard icon
   Sparkles, // For Hero button on main page & old wizard icon & wizard navigation
   Check, // For Wizard progress
   ArrowLeft, // For Wizard navigation
-  ArrowRight, // For Wizard apologize if my previous explanations were still a bit too scattered.
-} from 'lucide-react';
-// ... any other imports you have ...
+  ArrowRight, // For Wizard navigation
 } from 'lucide-react';
 
 // Interface for individual goals (remains from your original, studentName added)
@@ -34,14 +30,6 @@ interface Goal {
 }
 
 // Interface for defining each step in the wizard (from your original)
-interface WizardStep {
-  id: number;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-}
-// ... (Keep Goal and WizardStep interfaces as they are or as modified previously) ...
-
 interface WizardStep {
   id: number;
   title: string;
@@ -243,7 +231,7 @@ const GoalWriting: React.FC = () => {
     { id: 9, title: 'Related Services', description: 'Document related services.', icon: <Handshake className="text-green" size={24} /> },
   ];
 
-  const gradeOptions = ['K', '1', '2', '3', '4', '5']; // Moved here for 
+  const gradeOptions = ['K', '1', '2', '3', '4', '5'];
   const MATH_DOMAINS_BY_GRADE: Record<string, string[]> = {
     'K': ["Counting & Cardinality", "Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Measurement & Data", "Geometry"],
     '1': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Measurement & Data", "Geometry"],
@@ -251,9 +239,8 @@ const GoalWriting: React.FC = () => {
     '3': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Number & Operations - Fractions", "Measurement & Data", "Geometry"],
     '4': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Number & Operations - Fractions", "Measurement & Data", "Geometry"],
     '5': ["Operations & Algebraic Thinking", "Number & Operations in Base Ten", "Number & Operations - Fractions", "Measurement & Data", "Geometry"]
-    // You can refine these domain lists further by checking the official CCSS for each grade.
   };
-renderWizardStep
+
   // UPDATED handleStartWizard to reset ALL new fields
   const handleStartWizard = () => {
     setShowWizard(true);
@@ -603,7 +590,7 @@ renderWizardStep
                     index < currentStep ? 'bg-green-200 text-green border-green-200' : 
                     'border-border text-text-secondary'
                   }`}>
-                    {index < currentStep ? <Check size={16} smSize={20} /> : <span className="text-xs sm:text-sm font-medium">{index + 1}</span>}
+                    {index < currentStep ? <Check size={16} /> : <span className="text-xs sm:text-sm font-medium">{index + 1}</span>}
                   </div>
                   <div className="ml-2 sm:ml-3 text-left min-w-max">
                      <p className={`text-xs sm:text-sm font-medium truncate ${index === currentStep ? 'text-green' : 'text-text-secondary'}`}>{step.title}</p>
@@ -672,7 +659,7 @@ renderWizardStep
       <div className="card mb-8 bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm hover:shadow-lg">
         <div className="text-center py-10 sm:py-16 px-4">
           <div className="inline-block p-3 sm:p-4 bg-green/10 rounded-full mb-5 sm:mb-6">
-            <Sparkles className="text-green" size={32} sm:size={48} />
+            <Sparkles className="text-green" size={32} />
           </div>
           <h2 className="text-xl sm:text-3xl font-semibold mb-3 sm:mb-4">AI-Assisted IEP Development</h2>
           <p className="text-text-secondary text-sm sm:text-lg mb-6 sm:mb-8 max-w-xl sm:max-w-2xl mx-auto leading-relaxed">
@@ -682,16 +669,16 @@ renderWizardStep
             onClick={handleStartWizard}
             className="inline-flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-3.5 bg-green text-white rounded-lg sm:rounded-xl font-medium text-base sm:text-lg hover:bg-opacity-90 transition-all duration-200 shadow-lg hover:shadow-green/30 transform hover:scale-105"
           >
-            <Brain size={20} sm:size={24} />
+            <Brain size={20} />
             Create New Student IEP Goals
-            <ArrowRight size={20} sm:size={24} />
+            <ArrowRight size={20} />
           </button>
         </div>
       </div>
 
       <div className="card bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm">
         <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
-          <Lightbulb className="text-green" size={20} sm:size={22} />
+          <Lightbulb className="text-green" size={20} />
           <h2 className="text-xl sm:text-2xl font-medium">SMART Goal Writing Tips</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
