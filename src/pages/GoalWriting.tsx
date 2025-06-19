@@ -399,8 +399,148 @@ const GoalWriting: React.FC = () => {
             </div>
           </div>
         );
+      case 1: // Step 2: Previous IEP Goals Review
+        return (
+          <div className="space-y-8">
+            <div className="space-y-6">
+              {/* Domain Area Dropdown */}
+              <div>
+                <label htmlFor="previousGoalDomain" className="block text-sm font-medium mb-1 text-text-primary">
+                  Domain Area of Previous Goal:
+                </label>
+                <select
+                  id="previousGoalDomain"
+                  value={wizardData.previousGoalDomain}
+                  onChange={(e) => setWizardData({ ...wizardData, previousGoalDomain: e.target.value })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                >
+                  <option value="">Select Domain Area</option>
+                  <option value="Counting & Cardinality">Counting & Cardinality</option>
+                  <option value="Operations & Algebraic Thinking">Operations & Algebraic Thinking</option>
+                  <option value="Number & Operations in Base Ten">Number & Operations in Base Ten</option>
+                  <option value="Number & Operations - Fractions">Number & Operations - Fractions</option>
+                  <option value="Measurement & Data">Measurement & Data</option>
+                  <option value="Geometry">Geometry</option>
+                </select>
+              </div>
+
+              {/* Standard Alignment Dropdown */}
+              <div>
+                <label htmlFor="previousGoalStandardId" className="block text-sm font-medium mb-1 text-text-primary">
+                  Grade Level Standard Alignment of Previous Goal:
+                </label>
+                <select
+                  id="previousGoalStandardId"
+                  value={wizardData.previousGoalStandardId}
+                  onChange={(e) => setWizardData({ ...wizardData, previousGoalStandardId: e.target.value })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                  disabled={!wizardData.previousGoalDomain}
+                >
+                  <option value="">Select Standard (after choosing domain)</option>
+                  {wizardData.previousGoalDomain === "Operations & Algebraic Thinking" && (
+                    <>
+                      <option value="K.OA.A.2">K.OA.A.2 - Solve addition and subtraction word problems...</option>
+                      <option value="1.OA.A.1">1.OA.A.1 - Use addition and subtraction within 20...</option>
+                    </>
+                  )}
+                </select>
+                <p className="text-xs text-text-secondary mt-1">
+                  Note: Select Domain Area first to see relevant standards. Full list will be populated from CCSS data.
+                </p>
+              </div>
+
+              {/* Annual Goal Text Area */}
+              <div>
+                <label htmlFor="previousGoalAnnualGoalText" className="block text-sm font-medium mb-1 text-text-primary">
+                  Previous IEP Annual Goal Text:
+                </label>
+                <textarea
+                  id="previousGoalAnnualGoalText"
+                  value={wizardData.previousGoalAnnualGoalText}
+                  onChange={(e) => setWizardData({ ...wizardData, previousGoalAnnualGoalText: e.target.value })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-40"
+                  placeholder="Copy and paste the student's previous annual IEP goal here..."
+                />
+              </div>
+
+              {/* Progress Status and Continued Need Dropdowns */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="previousGoalProgressStatus" className="block text-sm font-medium mb-1 text-text-primary">
+                    Progress Towards Previous Annual Goal:
+                  </label>
+                  <select
+                    id="previousGoalProgressStatus"
+                    value={wizardData.previousGoalProgressStatus}
+                    onChange={(e) => setWizardData({ ...wizardData, previousGoalProgressStatus: e.target.value as WizardData['previousGoalProgressStatus'] })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                  >
+                    <option value="">Select Progress Status</option>
+                    <option value="met">Goal Met</option>
+                    <option value="partially_met">Partially Met</option>
+                    <option value="objectives_met">Objectives Met (but not annual goal)</option>
+                    <option value="minimal_progress">Minimal Progress</option>
+                    <option value="not_met">Goal Not Met</option>
+                    <option value="not_annual_goal">Not an Annual Goal (e.g., short-term only)</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="previousGoalContinuedNeed" className="block text-sm font-medium mb-1 text-text-primary">
+                    Is this a Continued Area of Need?
+                  </label>
+                  <select
+                    id="previousGoalContinuedNeed"
+                    value={wizardData.previousGoalContinuedNeed}
+                    onChange={(e) => setWizardData({ ...wizardData, previousGoalContinuedNeed: e.target.value as WizardData['previousGoalContinuedNeed'] })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                  >
+                    <option value="">Select Yes or No</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Always Visible Short-Term Objectives Section */}
+              <div className="mt-6 pt-6 border-t border-border"> {/* Added some top margin/padding and a border for separation */}
+                <h4 className="text-md font-semibold text-text-primary mb-4">
+                  Previous Short-Term Objectives (Optional)
+                </h4>
+                <div className="space-y-6 p-4 border border-border rounded-lg bg-bg-primary">
+                  {[1, 2, 3].map((num) => (
+                    <div key={num} className="space-y-2 pb-4 border-b border-border last:border-b-0 last:pb-0">
+                      <label htmlFor={`previousObjective${num}Text`} className="block text-sm font-medium text-text-primary">
+                        Objective {num} Text:
+                      </label>
+                      <textarea
+                        id={`previousObjective${num}Text`}
+                        value={wizardData[`previousObjective${num}Text` as keyof WizardData] as string}
+                        onChange={(e) => setWizardData({ ...wizardData, [`previousObjective${num}Text`]: e.target.value })}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                        placeholder={`Enter text for Objective ${num}...`}
+                      />
+                      <label htmlFor={`previousObjective${num}Status`} className="block text-sm font-medium text-text-primary pt-1">
+                        Objective {num} Status:
+                      </label>
+                      <select
+                        id={`previousObjective${num}Status`}
+                        value={wizardData[`previousObjective${num}Status` as keyof WizardData] as WizardData['previousObjective1Status']}
+                        onChange={(e) => setWizardData({ ...wizardData, [`previousObjective${num}Status`]: e.target.value as WizardData['previousObjective1Status'] })}
+                        className="w-full md:w-1/2 p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                      >
+                        <option value="">Select Status</option>
+                        <option value="met">Met</option>
+                        <option value="partially_met">Partially Met</option>
+                        <option value="not_met">Not Met</option>
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
       // Placeholder cases for the new steps
-      case 1: return <div>Content for Step 2: Previous IEP Goals Review (Coming Soon)</div>;
       case 2: return <div>Content for Step 3: Student Context & Supports (Coming Soon)</div>;
       case 3: return <div>Content for Step 4: Existing Student Data Input (Coming Soon)</div>;
       case 4: return <div>Content for Step 5: New Baseline Data & Analysis (Coming Soon)</div>;
