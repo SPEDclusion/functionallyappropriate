@@ -1,31 +1,31 @@
 import React, { useState } from 'react';
 import {
-  User, // For Step 1
-  BookOpen, // For Step 2
-  Settings, // For Step 3
-  BarChart2, // For Step 4
-  Microscope, // For Step 5
-  ShieldCheck, // For Step 6
-  Edit3, // For Step 7
-  FileText as IEPFileTextIcon, // For Step 8 (Present Levels)
-  Target as GoalTargetIcon, // For Step 9 (Goal Proposal) & main page
-  Handshake, // For Step 10
-  Lightbulb, // For SMART tips
-  Brain, // For hero button & old wizard
-  Sparkles, // For hero button & old wizard
-  Check,
-  ArrowLeft,
-  ArrowRight,
-  Calendar, // Old wizard icon
-  Plus,
-  Save, // Old component icon, not used in wizard
-  Trash2,
+ import React, { useState } from 'react'; // Your existing React import
+import {
+  User, // For Step 1 Icon
+  BookOpen, // For Step 2 Icon
+  Settings, // For Step 3 Icon
+  BarChart2, // For Step 4 Icon
+  Microscope, // For Step 5 Icon
+  ShieldCheck, // For Step 6 Icon
+  Edit3, // For Step 7 Icon
+  FileText as IEPFileTextIcon, // For Step 8 Icon (Present Levels) - aliased
+  Target as GoalTargetIcon, // For Step 9 Icon (Goal Proposal) - aliased, also used on main page
+  Handshake, //You For Step 10 Icon
+  Lightbulb, // For SMART tips on main page
+  Brain, // For Hero button're right to push for clarity on this crucial "manual setup" step! I on main page & old wizard icon
+  Sparkles, // For Hero button on main page & old wizard icon & wizard navigation
+  Check, // For Wizard progress
+  ArrowLeft, // For Wizard navigation
+  ArrowRight, // For Wizard apologize if my previous explanations were still a bit too scattered.
+} from 'lucide-react';
+// ... any other imports you have ...
 } from 'lucide-react';
 
 // Interface for individual goals (remains from your original, studentName added)
 interface Goal {
   id: number;
-  studentName?: string; // Made optional for flexibility
+  studentName?: string; // <<<< THIS LINE IS ADDED/MODIFIED
   area: string;
   description: string;
   baseline: string;
@@ -40,8 +40,22 @@ interface WizardStep {
   description: string;
   icon: React.ReactNode;
 }
+// ... (Keep Goal and WizardStep interfaces as they are or as modified previously) ...
 
-// NEW/UPDATED WizardData Interface for all 10 steps
+interface WizardStep {
+  id: number;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}
+
+interface StrengthGrowthEntry {
+  mainDomain: string; // e.g., "Math", "Reading"
+  ccssDomainsStatus: Array<{ domainName: string; status: 'strength' | 'growth' | 'unselected' }>;
+  strengthsAnecdotal: string;
+  growthAreasAnecdotal: string;
+}
+
 interface WizardData {
   // Step 1: Student Demographics
   studentName: string;
