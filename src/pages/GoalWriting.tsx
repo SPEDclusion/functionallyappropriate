@@ -217,17 +217,17 @@ const GoalWriting: React.FC = () => {
     relatedServiceEndDate: '',
   });
 
-  // UPDATED wizardSteps array for the new 10-step flow
+  // UPDATED wizardSteps array for the new 10-step flow with your specified titles
   const wizardSteps: WizardStep[] = [
     { id: 0, title: 'Student Demographics', description: 'Basic information about the student.', icon: <User className="text-green" size={24} /> },
-    { id: 1, title: 'Previous IEP Goals Review', description: 'Review progress on prior goals.', icon: <BookOpen className="text-green" size={24} /> },
-    { id: 2, title: 'Student Context & Supports', description: 'Gather qualitative information.', icon: <Settings className="text-green" size={24} /> },
-    { id: 3, title: 'Existing Student Data Input', description: 'Input data from various assessments.', icon: <BarChart2 className="text-green" size={24} /> },
-    { id: 4, title: 'New Baseline Data & Analysis', description: 'Input results from new baseline assessments.', icon: <Microscope className="text-green" size={24} /> },
-    { id: 5, title: 'Accommodations & Modifications', description: 'Define supports for the student.', icon: <ShieldCheck className="text-green" size={24} /> },
+    { id: 1, title: 'Previous IEPs', description: 'Review progress on prior goals.', icon: <BookOpen className="text-green" size={24} /> },
+    { id: 2, title: 'Qualitative Student Data', description: 'Gather qualitative information.', icon: <Settings className="text-green" size={24} /> },
+    { id: 3, title: 'Quantitative Student Data', description: 'Input data from various assessments.', icon: <BarChart2 className="text-green" size={24} /> },
+    { id: 4, title: 'Data Analysis', description: 'Input results from new baseline assessments.', icon: <Microscope className="text-green" size={24} /> },
+    { id: 5, title: 'Student Accommodations and Supports', description: 'Define supports for the student.', icon: <ShieldCheck className="text-green" size={24} /> },
     { id: 6, title: 'Special Factors', description: 'Address specific considerations.', icon: <Edit3 className="text-green" size={24} /> },
-    { id: 7, title: 'Draft Present Levels', description: 'AI will help synthesize data into a PLOP.', icon: <IEPFileTextIcon className="text-green" size={24} /> },
-    { id: 8, title: 'Propose IEP Goals & Objectives', description: 'AI will recommend goals.', icon: <GoalTargetIcon className="text-green" size={24} /> },
+    { id: 7, title: 'Present Levels', description: 'AI will help synthesize data into a PLOP.', icon: <IEPFileTextIcon className="text-green" size={24} /> },
+    { id: 8, title: 'Goal Proposal', description: 'AI will recommend goals.', icon: <GoalTargetIcon className="text-green" size={24} /> },
     { id: 9, title: 'Related Services', description: 'Document related services.', icon: <Handshake className="text-green" size={24} /> },
   ];
 
@@ -550,14 +550,14 @@ const GoalWriting: React.FC = () => {
             </div>
           </div>
         );
-      // Placeholder cases for the new steps
-      case 2: return <div>Content for Step 3: Student Context & Supports (Coming Soon)</div>;
-      case 3: return <div>Content for Step 4: Existing Student Data Input (Coming Soon)</div>;
-      case 4: return <div>Content for Step 5: New Baseline Data & Analysis (Coming Soon)</div>;
-      case 5: return <div>Content for Step 6: Accommodations & Modifications (Coming Soon)</div>;
+      // Placeholder cases for the remaining steps
+      case 2: return <div>Content for Step 3: Qualitative Student Data (Coming Soon)</div>;
+      case 3: return <div>Content for Step 4: Quantitative Student Data (Coming Soon)</div>;
+      case 4: return <div>Content for Step 5: Data Analysis (Coming Soon)</div>;
+      case 5: return <div>Content for Step 6: Student Accommodations and Supports (Coming Soon)</div>;
       case 6: return <div>Content for Step 7: Special Factors (Coming Soon)</div>;
-      case 7: return <div>Content for Step 8: Draft Present Levels (Coming Soon)</div>;
-      case 8: return <div>Content for Step 9: Propose IEP Goals & Objectives (Coming Soon)</div>;
+      case 7: return <div>Content for Step 8: Present Levels (Coming Soon)</div>;
+      case 8: return <div>Content for Step 9: Goal Proposal (Coming Soon)</div>;
       case 9: return <div>Content for Step 10: Related Services (Coming Soon)</div>;
       default:
         return <div>Invalid step or step not yet implemented.</div>;
