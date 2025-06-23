@@ -18,7 +18,6 @@ import {
   ArrowRight,
   Calendar, // Old wizard icon
   Plus,
-  Save, // Old component icon, not used in wizard
   Trash2,
   Upload,
   FileUp,
