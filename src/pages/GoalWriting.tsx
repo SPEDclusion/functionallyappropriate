@@ -72,7 +72,7 @@ interface WizardData {
   areasOfGrowthQualitative: string;
 
   // Step 4: Existing Student Data Input
-  benchmarkAssessmentType: 'NWEA' | 'Curriculum-Based' | 'Benchmark' | 'Other' | '';
+  benchmarkAssessmentType: 'NWEA' | 'SANDI' | 'Other' | '';
   benchmarkAssessmentOtherName: string;
   benchmarkDataManualInput: string;
   nweaRitScore: string;
@@ -95,7 +95,6 @@ interface WizardData {
   behaviorNeeds: 'yes' | 'no' | '';
   behaviorSupports: string[];
   elSupports: string;
-  // NEW fields for Step 6
   otherAccommodationsText: string;
   otherModificationsText: string;
   otherBehaviorSupportsText: string;
@@ -154,18 +153,18 @@ const GoalWriting: React.FC = () => {
 
   const [showWizard, setShowWizard] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedStudentForWizard, setSelectedStudentForWizard] = useState('');
 
   // Mock students for dropdown
   const mockStudents = [
-    { id: 'student1', name: 'Alex Chen' },
-    { id: 'student2', name: 'Maria Rodriguez' },
-    { id: 'student3', name: 'Jordan Smith' },
-    { id: 'student4', name: 'Taylor Johnson' },
-    { id: 'student5', name: 'Casey Williams' },
+    { id: 'alex-chen', name: 'Alex Chen' },
+    { id: 'maria-rodriguez', name: 'Maria Rodriguez' },
+    { id: 'jordan-smith', name: 'Jordan Smith' },
+    { id: 'taylor-johnson', name: 'Taylor Johnson' },
+    { id: 'casey-williams', name: 'Casey Williams' },
   ];
 
-  // UPDATED useState for wizardData with ALL new fields including Step 6 additions
+  // UPDATED useState for wizardData with ALL new fields
   const [wizardData, setWizardData] = useState<WizardData>({
     studentName: '',
     currentGradeLevel: 'K',
@@ -208,7 +207,6 @@ const GoalWriting: React.FC = () => {
     behaviorNeeds: '',
     behaviorSupports: [],
     elSupports: '',
-    // NEW Step 6 fields
     otherAccommodationsText: '',
     otherModificationsText: '',
     otherBehaviorSupportsText: '',
@@ -253,16 +251,14 @@ const GoalWriting: React.FC = () => {
 
   // UPDATED handleStartWizard to reset ALL new fields
   const handleStartWizard = () => {
-    if (!selectedStudent) {
-      alert('Please select a student first.');
-      return;
-    }
+    if (!selectedStudentForWizard) return;
     
-    const student = mockStudents.find(s => s.id === selectedStudent);
+    const selectedStudent = mockStudents.find(s => s.id === selectedStudentForWizard);
+    
     setShowWizard(true);
     setCurrentStep(0);
     setWizardData({
-      studentName: student?.name || '', currentGradeLevel: 'K', schoolName: '', primaryDisability: '', secondaryDisability: '', studentInterestsGeneralInfo: '', englishLearnerStatus: '',
+      studentName: selectedStudent?.name || '', currentGradeLevel: 'K', schoolName: '', primaryDisability: '', secondaryDisability: '', studentInterestsGeneralInfo: '', englishLearnerStatus: '',
       previousGoalDomain: '', previousGoalStandardId: '', previousGoalAnnualGoalText: '', previousGoalProgressStatus: '', previousGoalContinuedNeed: '', showPreviousObjectives: false, previousObjective1Text: '', previousObjective1Status: '', previousObjective2Text: '', previousObjective2Status: '', previousObjective3Text: '', previousObjective3Status: '',
       anecdotalObservationsGE: '', academicStrengthsGeneralInfo: '', areasOfGrowthQualitative: '',
       benchmarkAssessmentType: '', benchmarkAssessmentOtherName: '', benchmarkDataManualInput: '', nweaRitScore: '', nweaPercentilePeers: '', nweaGrowthPercentile: '', statewideAssessmentType: '', statewideAssessmentScores: '', elpacScores: '',
@@ -285,6 +281,18 @@ const GoalWriting: React.FC = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  // Helper function for checkbox changes
+  const handleCheckboxChange = (field: keyof WizardData, value: string, checked: boolean) => {
+    setWizardData(prev => {
+      const currentArray = prev[field] as string[];
+      if (checked) {
+        return { ...prev, [field]: [...currentArray, value] };
+      } else {
+        return { ...prev, [field]: currentArray.filter(item => item !== value) };
+      }
+    });
   };
 
   // handleGenerateGoal will need significant updates later to use new wizardData
@@ -314,19 +322,6 @@ const GoalWriting: React.FC = () => {
       case 'draft': return 'bg-yellow-400 text-black'; // Adjusted yellow for better contrast
       case 'completed': return 'bg-blue-500 text-white';
       default: return 'bg-gray-400 text-white';
-    }
-  };
-
-  // Helper function to handle checkbox changes for arrays
-  const handleCheckboxChange = (
-    value: string,
-    currentArray: string[],
-    setterFunction: (newArray: string[]) => void
-  ) => {
-    if (currentArray.includes(value)) {
-      setterFunction(currentArray.filter(item => item !== value));
-    } else {
-      setterFunction([...currentArray, value]);
     }
   };
 
@@ -440,247 +435,229 @@ const GoalWriting: React.FC = () => {
         );
 
       case 1: // Step 2: Previous IEP Goals Review
-        const domainOptions = [
-          'Counting & Cardinality',
-          'Operations & Algebraic Thinking',
-          'Number & Operations in Base Ten',
-          'Measurement & Data',
-          'Geometry',
-          'Reading Foundational Skills',
-          'Reading Literature',
-          'Reading Informational Text',
-          'Writing',
-          'Speaking & Listening',
-          'Language',
-          'Social/Emotional/Behavioral',
-          'Adaptive/Daily Living Skills',
-          'Communication',
-          'Fine/Gross Motor'
-        ];
-
-        const getStandardsForDomain = (domain: string) => {
-          switch (domain) {
-            case 'Operations & Algebraic Thinking':
-              return ['K.OA.A.1', 'K.OA.A.2', '1.OA.A.1', '1.OA.A.2', '2.OA.A.1', '2.OA.B.2'];
-            case 'Counting & Cardinality':
-              return ['K.CC.A.1', 'K.CC.A.2', 'K.CC.A.3', 'K.CC.B.4', 'K.CC.B.5'];
-            case 'Number & Operations in Base Ten':
-              return ['K.NBT.A.1', '1.NBT.A.1', '1.NBT.B.2', '2.NBT.A.1', '2.NBT.A.2'];
-            default:
-              return [];
-          }
-        };
-
         return (
-          <div className="space-y-8">
-            {/* Previous Goal Information Section */}
-            <div className="space-y-6">
-              <h3 className="text-lg font-medium text-text-primary border-b border-border pb-2">
-                Previous Goal Information
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="previousGoalDomain" className="block text-sm font-medium mb-1 text-text-primary">
-                    Domain Area of Previous Goal:
-                  </label>
-                  <select
-                    id="previousGoalDomain"
-                    value={wizardData.previousGoalDomain}
-                    onChange={(e) => setWizardData({ 
-                      ...wizardData, 
-                      previousGoalDomain: e.target.value,
-                      previousGoalStandardId: '' // Reset standard when domain changes
-                    })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                  >
-                    <option value="">Select Domain Area</option>
-                    {domainOptions.map(domain => (
-                      <option key={domain} value={domain}>{domain}</option>
-                    ))}
-                  </select>
-                </div>
+          <div className="space-y-6">
+            {/* Domain Area Selection */}
+            <div>
+              <label htmlFor="previousGoalDomain" className="block text-sm font-medium mb-1 text-text-primary">
+                Domain Area of Previous Goal:
+              </label>
+              <select
+                id="previousGoalDomain"
+                value={wizardData.previousGoalDomain}
+                onChange={(e) => setWizardData({ ...wizardData, previousGoalDomain: e.target.value, previousGoalStandardId: '' })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+              >
+                <option value="">Select Domain Area</option>
+                <option value="Counting & Cardinality">Counting & Cardinality</option>
+                <option value="Operations & Algebraic Thinking">Operations & Algebraic Thinking</option>
+                <option value="Number & Operations in Base Ten">Number & Operations in Base Ten</option>
+                <option value="Measurement & Data">Measurement & Data</option>
+                <option value="Geometry">Geometry</option>
+                <option value="Reading Foundational Skills">Reading Foundational Skills</option>
+                <option value="Reading Literature">Reading Literature</option>
+                <option value="Reading Informational Text">Reading Informational Text</option>
+                <option value="Writing">Writing</option>
+                <option value="Speaking & Listening">Speaking & Listening</option>
+                <option value="Language">Language</option>
+              </select>
+            </div>
 
-                <div>
-                  <label htmlFor="previousGoalStandardId" className="block text-sm font-medium mb-1 text-text-primary">
-                    Grade Level Standard Alignment of Previous Goal:
-                  </label>
-                  <select
-                    id="previousGoalStandardId"
-                    value={wizardData.previousGoalStandardId}
-                    onChange={(e) => setWizardData({ ...wizardData, previousGoalStandardId: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                    disabled={!wizardData.previousGoalDomain}
-                  >
-                    <option value="">Select Standard</option>
-                    {getStandardsForDomain(wizardData.previousGoalDomain).map(standard => (
-                      <option key={standard} value={standard}>{standard}</option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-text-secondary mt-1">
-                    Note: Select Domain Area first to see relevant standards. Full list will be populated from CCSS data.
-                  </p>
-                </div>
+            {/* Standard Alignment Selection - Only show if domain is selected */}
+            {wizardData.previousGoalDomain && (
+              <div>
+                <label htmlFor="previousGoalStandardId" className="block text-sm font-medium mb-1 text-text-primary">
+                  Grade Level Standard Alignment of Previous Goal:
+                </label>
+                <select
+                  id="previousGoalStandardId"
+                  value={wizardData.previousGoalStandardId}
+                  onChange={(e) => setWizardData({ ...wizardData, previousGoalStandardId: e.target.value })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                >
+                  <option value="">Select Standard</option>
+                  {wizardData.previousGoalDomain === 'Operations & Algebraic Thinking' && (
+                    <>
+                      <option value="K.OA.A.1">K.OA.A.1 - Represent addition and subtraction with objects</option>
+                      <option value="K.OA.A.2">K.OA.A.2 - Solve addition and subtraction word problems</option>
+                      <option value="1.OA.A.1">1.OA.A.1 - Use addition and subtraction within 20</option>
+                      <option value="1.OA.B.3">1.OA.B.3 - Apply properties of operations</option>
+                      <option value="2.OA.A.1">2.OA.A.1 - Use addition and subtraction within 100</option>
+                    </>
+                  )}
+                  {wizardData.previousGoalDomain === 'Counting & Cardinality' && (
+                    <>
+                      <option value="K.CC.A.1">K.CC.A.1 - Count to 100 by ones and tens</option>
+                      <option value="K.CC.A.2">K.CC.A.2 - Count forward beginning from a given number</option>
+                      <option value="K.CC.B.4">K.CC.B.4 - Understand the relationship between numbers and quantities</option>
+                    </>
+                  )}
+                  {/* Add more standards for other domains as needed */}
+                </select>
+                <p className="text-xs text-text-secondary mt-1">
+                  Note: Select Domain Area first to see relevant standards. Full list will be populated from CCSS data.
+                </p>
+              </div>
+            )}
+
+            {/* Previous Annual Goal Text */}
+            <div>
+              <label htmlFor="previousGoalAnnualGoalText" className="block text-sm font-medium mb-1 text-text-primary">
+                Previous IEP Annual Goal Text:
+              </label>
+              <textarea
+                id="previousGoalAnnualGoalText"
+                value={wizardData.previousGoalAnnualGoalText}
+                onChange={(e) => setWizardData({ ...wizardData, previousGoalAnnualGoalText: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-40"
+                placeholder="Copy and paste the student's previous annual IEP goal here..."
+              />
+            </div>
+
+            {/* Progress Status and Continued Need - Side by Side */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="previousGoalProgressStatus" className="block text-sm font-medium mb-1 text-text-primary">
+                  Progress Towards Previous Annual Goal:
+                </label>
+                <select
+                  id="previousGoalProgressStatus"
+                  value={wizardData.previousGoalProgressStatus}
+                  onChange={(e) => setWizardData({ ...wizardData, previousGoalProgressStatus: e.target.value as WizardData['previousGoalProgressStatus'] })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                >
+                  <option value="">Select Progress Status</option>
+                  <option value="met">Goal Met</option>
+                  <option value="partially_met">Partially Met</option>
+                  <option value="not_met">Goal Not Met</option>
+                  <option value="minimal_progress">Minimal Progress</option>
+                  <option value="objectives_met">Objectives Met</option>
+                  <option value="not_annual_goal">Not an Annual Goal</option>
+                </select>
               </div>
 
               <div>
-                <label htmlFor="previousGoalAnnualGoalText" className="block text-sm font-medium mb-1 text-text-primary">
-                  Previous IEP Annual Goal Text:
+                <label htmlFor="previousGoalContinuedNeed" className="block text-sm font-medium mb-1 text-text-primary">
+                  Is this a Continued Area of Need?
                 </label>
-                <textarea
-                  id="previousGoalAnnualGoalText"
-                  value={wizardData.previousGoalAnnualGoalText}
-                  onChange={(e) => setWizardData({ ...wizardData, previousGoalAnnualGoalText: e.target.value })}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-40"
-                  placeholder="Copy and paste the student's previous annual IEP goal here..."
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="previousGoalProgressStatus" className="block text-sm font-medium mb-1 text-text-primary">
-                    Progress Towards Previous Annual Goal:
-                  </label>
-                  <select
-                    id="previousGoalProgressStatus"
-                    value={wizardData.previousGoalProgressStatus}
-                    onChange={(e) => setWizardData({ ...wizardData, previousGoalProgressStatus: e.target.value as WizardData['previousGoalProgressStatus'] })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                  >
-                    <option value="">Select Progress Status</option>
-                    <option value="met">Goal Met</option>
-                    <option value="partially_met">Partially Met</option>
-                    <option value="not_met">Goal Not Met</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="previousGoalContinuedNeed" className="block text-sm font-medium mb-1 text-text-primary">
-                    Is this a Continued Area of Need?
-                  </label>
-                  <select
-                    id="previousGoalContinuedNeed"
-                    value={wizardData.previousGoalContinuedNeed}
-                    onChange={(e) => setWizardData({ ...wizardData, previousGoalContinuedNeed: e.target.value as WizardData['previousGoalContinuedNeed'] })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                  >
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                  </select>
-                </div>
+                <select
+                  id="previousGoalContinuedNeed"
+                  value={wizardData.previousGoalContinuedNeed}
+                  onChange={(e) => setWizardData({ ...wizardData, previousGoalContinuedNeed: e.target.value as WizardData['previousGoalContinuedNeed'] })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                >
+                  <option value="">Select</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
               </div>
             </div>
 
             {/* Previous Short-Term Objectives Section */}
-            <div className="space-y-6 border-t border-border pt-6">
-              <h3 className="text-lg font-medium text-text-primary">
-                Previous Short-Term Objectives (Optional)
-              </h3>
+            <div className="border-t border-border pt-6">
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Previous Short-Term Objectives (Optional)</h3>
               
-              <div className="space-y-6">
-                {/* Objective 1 */}
-                <div className="p-4 bg-bg-secondary rounded-lg border border-border">
-                  <h4 className="font-medium text-text-primary mb-3">Objective 1</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="previousObjective1Text" className="block text-sm font-medium mb-1 text-text-primary">
-                        Objective Text:
-                      </label>
-                      <textarea
-                        id="previousObjective1Text"
-                        value={wizardData.previousObjective1Text}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective1Text: e.target.value })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                        placeholder="Enter the first short-term objective..."
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="previousObjective1Status" className="block text-sm font-medium mb-1 text-text-primary">
-                        Status:
-                      </label>
-                      <select
-                        id="previousObjective1Status"
-                        value={wizardData.previousObjective1Status}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective1Status: e.target.value as WizardData['previousObjective1Status'] })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                      >
-                        <option value="">Select Status</option>
-                        <option value="met">Met</option>
-                        <option value="partially_met">Partially Met</option>
-                        <option value="not_met">Not Met</option>
-                      </select>
-                    </div>
+              {/* Objective 1 */}
+              <div className="mb-6 p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                <h4 className="font-medium mb-3 text-text-primary">Objective 1</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="previousObjective1Text" className="block text-sm font-medium mb-1 text-text-primary">
+                      Objective Text:
+                    </label>
+                    <textarea
+                      id="previousObjective1Text"
+                      value={wizardData.previousObjective1Text}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective1Text: e.target.value })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                      placeholder="Enter the first short-term objective..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="previousObjective1Status" className="block text-sm font-medium mb-1 text-text-primary">
+                      Status:
+                    </label>
+                    <select
+                      id="previousObjective1Status"
+                      value={wizardData.previousObjective1Status}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective1Status: e.target.value as WizardData['previousObjective1Status'] })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="met">Met</option>
+                      <option value="partially_met">Partially Met</option>
+                      <option value="not_met">Not Met</option>
+                    </select>
                   </div>
                 </div>
+              </div>
 
-                {/* Objective 2 */}
-                <div className="p-4 bg-bg-secondary rounded-lg border border-border">
-                  <h4 className="font-medium text-text-primary mb-3">Objective 2</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="previousObjective2Text" className="block text-sm font-medium mb-1 text-text-primary">
-                        Objective Text:
-                      </label>
-                      <textarea
-                        id="previousObjective2Text"
-                        value={wizardData.previousObjective2Text}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective2Text: e.target.value })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                        placeholder="Enter the second short-term objective..."
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="previousObjective2Status" className="block text-sm font-medium mb-1 text-text-primary">
-                        Status:
-                      </label>
-                      <select
-                        id="previousObjective2Status"
-                        value={wizardData.previousObjective2Status}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective2Status: e.target.value as WizardData['previousObjective2Status'] })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                      >
-                        <option value="">Select Status</option>
-                        <option value="met">Met</option>
-                        <option value="partially_met">Partially Met</option>
-                        <option value="not_met">Not Met</option>
-                      </select>
-                    </div>
+              {/* Objective 2 */}
+              <div className="mb-6 p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                <h4 className="font-medium mb-3 text-text-primary">Objective 2</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="previousObjective2Text" className="block text-sm font-medium mb-1 text-text-primary">
+                      Objective Text:
+                    </label>
+                    <textarea
+                      id="previousObjective2Text"
+                      value={wizardData.previousObjective2Text}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective2Text: e.target.value })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                      placeholder="Enter the second short-term objective..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="previousObjective2Status" className="block text-sm font-medium mb-1 text-text-primary">
+                      Status:
+                    </label>
+                    <select
+                      id="previousObjective2Status"
+                      value={wizardData.previousObjective2Status}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective2Status: e.target.value as WizardData['previousObjective2Status'] })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="met">Met</option>
+                      <option value="partially_met">Partially Met</option>
+                      <option value="not_met">Not Met</option>
+                    </select>
                   </div>
                 </div>
+              </div>
 
-                {/* Objective 3 */}
-                <div className="p-4 bg-bg-secondary rounded-lg border border-border">
-                  <h4 className="font-medium text-text-primary mb-3">Objective 3</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="previousObjective3Text" className="block text-sm font-medium mb-1 text-text-primary">
-                        Objective Text:
-                      </label>
-                      <textarea
-                        id="previousObjective3Text"
-                        value={wizardData.previousObjective3Text}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective3Text: e.target.value })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                        placeholder="Enter the third short-term objective..."
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="previousObjective3Status" className="block text-sm font-medium mb-1 text-text-primary">
-                        Status:
-                      </label>
-                      <select
-                        id="previousObjective3Status"
-                        value={wizardData.previousObjective3Status}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective3Status: e.target.value as WizardData['previousObjective3Status'] })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                      >
-                        <option value="">Select Status</option>
-                        <option value="met">Met</option>
-                        <option value="partially_met">Partially Met</option>
-                        <option value="not_met">Not Met</option>
-                      </select>
-                    </div>
+              {/* Objective 3 */}
+              <div className="mb-6 p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                <h4 className="font-medium mb-3 text-text-primary">Objective 3</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="previousObjective3Text" className="block text-sm font-medium mb-1 text-text-primary">
+                      Objective Text:
+                    </label>
+                    <textarea
+                      id="previousObjective3Text"
+                      value={wizardData.previousObjective3Text}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective3Text: e.target.value })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                      placeholder="Enter the third short-term objective..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="previousObjective3Status" className="block text-sm font-medium mb-1 text-text-primary">
+                      Status:
+                    </label>
+                    <select
+                      id="previousObjective3Status"
+                      value={wizardData.previousObjective3Status}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective3Status: e.target.value as WizardData['previousObjective3Status'] })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="met">Met</option>
+                      <option value="partially_met">Partially Met</option>
+                      <option value="not_met">Not Met</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -688,95 +665,552 @@ const GoalWriting: React.FC = () => {
           </div>
         );
 
-      // Placeholder cases for the new steps
-      case 2: return <div>Content for Step 3: Student Context & Supports (Coming Soon)</div>;
-      case 3: return <div>Content for Step 4: Existing Student Data Input (Coming Soon)</div>;
-      case 4: return <div>Content for Step 5: New Baseline Data & Analysis (Coming Soon)</div>;
-      
-      case 5: // Step 6: Student Accommodations and Supports
-        const commonAccommodations = [
-          'Extended Time',
-          'Preferential Seating',
-          'Visual Aids/Schedules',
-          'Manipulatives',
-          'Frequent Breaks',
-          'Graphic Organizers',
-          'Simplified Directions',
-          'Text-to-Speech',
-          'Speech-to-Text',
-          'Note-taker/Copy of Notes',
-          'Use of Calculator (for specific tasks)',
-          'Small Group Testing',
-          'Reduced Distractions Environment'
-        ];
+      case 2: // Step 3: Student Context & Supports
+        return (
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="anecdotalObservationsGE" className="block text-sm font-medium mb-1 text-text-primary">
+                Anecdotal Observations in General Education:
+              </label>
+              <textarea
+                id="anecdotalObservationsGE"
+                value={wizardData.anecdotalObservationsGE}
+                onChange={(e) => setWizardData({ ...wizardData, anecdotalObservationsGE: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Describe observations of the student in the general education classroom, including behavior, participation, and interaction with peers..."
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="academicStrengthsGeneralInfo" className="block text-sm font-medium mb-1 text-text-primary">
+                Academic Strengths and General Information:
+              </label>
+              <textarea
+                id="academicStrengthsGeneralInfo"
+                value={wizardData.academicStrengthsGeneralInfo}
+                onChange={(e) => setWizardData({ ...wizardData, academicStrengthsGeneralInfo: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Describe the student's academic strengths, preferred learning styles, motivators, and any other relevant information..."
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="areasOfGrowthQualitative" className="block text-sm font-medium mb-1 text-text-primary">
+                Areas of Growth (Qualitative):
+              </label>
+              <textarea
+                id="areasOfGrowthQualitative"
+                value={wizardData.areasOfGrowthQualitative}
+                onChange={(e) => setWizardData({ ...wizardData, areasOfGrowthQualitative: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Describe areas where the student needs growth or support, including academic, behavioral, social, or communication needs..."
+              />
+            </div>
+          </div>
+        );
 
-        const commonModifications = [
-          'Reduced Number of Problems/Tasks',
-          'Modified Curriculum (e.g., below grade-level content)',
-          'Alternative Assessment Format',
-          'Grading Based on IEP Goals/Effort',
-          'Shorter Assignments',
-          'Simplified Content/Text',
-          'Use of Alternate Materials'
-        ];
-
-        const commonBehavioralSupports = [
-          'First-Then Statements',
-          'Token Board/Reinforcement System',
-          'Scheduled Breaks/Movement Breaks',
-          'Visual Timer',
-          'Positive Phrasing & Redirection',
-          'Check-in/Check-out System',
-          'Clear & Consistent Expectations',
-          'Social Stories/Scripts'
-        ];
-
-        const commonELSupports = [
-          'Bilingual Dictionary/Glossary',
-          'Visuals/Realia/Manipulatives',
-          'Sentence Frames/Starters',
-          'Native Language Support (when available)',
-          'Simplified Language/Instructions',
-          'Graphic Organizers specifically for ELs',
-          'Peer Tutoring/Partner Work'
-        ];
-
+      case 3: // Step 4: Existing Student Data Input
         return (
           <div className="space-y-8">
-            {/* Accommodations Section */}
-            <div className="space-y-6">
-              <h3 className="text-lg font-medium text-text-primary border-b border-border pb-2">
-                Accommodations
-              </h3>
+            {/* Formative Assessment Section */}
+            <div className="border-b border-border pb-6">
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Formative Assessment Data</h3>
               
-              <div className="p-4 bg-green bg-opacity-5 border border-green border-opacity-20 rounded-lg">
-                <p className="text-sm text-text-secondary">
-                  <strong>Definition:</strong> Accommodations help students access the same curriculum and meet the same learning goals and expectations as their peers. They change <em>how</em> a student learns, not <em>what</em> they learn.
-                </p>
+              <div className="mb-4">
+                <label htmlFor="benchmarkAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
+                  Formative Assessment Given:
+                </label>
+                <select
+                  id="benchmarkAssessmentType"
+                  value={wizardData.benchmarkAssessmentType}
+                  onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentType: e.target.value as WizardData['benchmarkAssessmentType'] })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                >
+                  <option value="">Select Assessment Type</option>
+                  <option value="NWEA">NWEA</option>
+                  <option value="SANDI">SANDI</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
-              <div>
-                <h4 className="text-md font-medium text-text-primary mb-3">Select Common Accommodations:</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {commonAccommodations.map((accommodation) => (
-                    <label key={accommodation} htmlFor={`accommodation-${accommodation}`} className="flex items-center space-x-3 p-3 border border-border rounded-lg hover:border-green hover:bg-green hover:bg-opacity-5 transition-all cursor-pointer">
-                      <input
-                        type="checkbox"
-                        id={`accommodation-${accommodation}`}
-                        checked={wizardData.accommodations.includes(accommodation)}
-                        onChange={() => handleCheckboxChange(
-                          accommodation,
-                          wizardData.accommodations,
-                          (newArray) => setWizardData({ ...wizardData, accommodations: newArray })
-                        )}
-                        className="text-green focus:ring-green"
-                      />
-                      <span className="text-sm">{accommodation}</span>
-                    </label>
-                  ))}
+              {/* NWEA Section */}
+              {wizardData.benchmarkAssessmentType === 'NWEA' && (
+                <div className="bg-bg-secondary bg-opacity-30 p-4 rounded-lg">
+                  <h4 className="font-medium mb-3 text-text-primary">NWEA Scores</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Reading Section */}
+                    <div>
+                      <h5 className="font-medium mb-3 text-green">Reading</h5>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="nweaReadingRit" className="block text-sm font-medium mb-1">RIT Score:</label>
+                          <input
+                            type="number"
+                            id="nweaReadingRit"
+                            className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                            placeholder="e.g., 185"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="nweaReadingPercentile" className="block text-sm font-medium mb-1">% Compared to Peers:</label>
+                          <input
+                            type="number"
+                            id="nweaReadingPercentile"
+                            min="1"
+                            max="99"
+                            className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                            placeholder="e.g., 45"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="nweaReadingGrowth" className="block text-sm font-medium mb-1">Growth %:</label>
+                          <input
+                            type="number"
+                            id="nweaReadingGrowth"
+                            className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                            placeholder="e.g., 65"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Math Section */}
+                    <div>
+                      <h5 className="font-medium mb-3 text-green">Math</h5>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="nweaMathRit" className="block text-sm font-medium mb-1">RIT Score:</label>
+                          <input
+                            type="number"
+                            id="nweaMathRit"
+                            className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                            placeholder="e.g., 190"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="nweaMathPercentile" className="block text-sm font-medium mb-1">% Compared to Peers:</label>
+                          <input
+                            type="number"
+                            id="nweaMathPercentile"
+                            min="1"
+                            max="99"
+                            className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                            placeholder="e.g., 52"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="nweaMathGrowth" className="block text-sm font-medium mb-1">Growth %:</label>
+                          <input
+                            type="number"
+                            id="nweaMathGrowth"
+                            className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                            placeholder="e.g., 70"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SANDI Section */}
+              {wizardData.benchmarkAssessmentType === 'SANDI' && (
+                <div className="bg-bg-secondary bg-opacity-30 p-4 rounded-lg">
+                  <h4 className="font-medium mb-3 text-text-primary">SANDI Scores</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {['Reading', 'Writing', 'Math', 'Communication'].map((subject) => (
+                      <div key={subject}>
+                        <h5 className="font-medium mb-2 text-green">{subject}</h5>
+                        <div className="space-y-2">
+                          <div>
+                            <label htmlFor={`sandi${subject}Score`} className="block text-xs font-medium mb-1">Score:</label>
+                            <input
+                              type="number"
+                              id={`sandi${subject}Score`}
+                              className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green text-sm"
+                              placeholder="Score"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor={`sandi${subject}Level`} className="block text-xs font-medium mb-1">Level:</label>
+                            <select
+                              id={`sandi${subject}Level`}
+                              className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green text-sm"
+                            >
+                              <option value="">Select Level</option>
+                              <option value="1">Level 1</option>
+                              <option value="2">Level 2</option>
+                              <option value="3">Level 3</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Other Assessment */}
+              {wizardData.benchmarkAssessmentType === 'Other' && (
+                <div className="bg-bg-secondary bg-opacity-30 p-4 rounded-lg">
+                  <div className="mb-3">
+                    <label htmlFor="benchmarkAssessmentOtherName" className="block text-sm font-medium mb-1">Assessment Name:</label>
+                    <input
+                      type="text"
+                      id="benchmarkAssessmentOtherName"
+                      value={wizardData.benchmarkAssessmentOtherName}
+                      onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentOtherName: e.target.value })}
+                      className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                      placeholder="Enter assessment name"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="benchmarkDataManualInput" className="block text-sm font-medium mb-1">Assessment Data:</label>
+                    <textarea
+                      id="benchmarkDataManualInput"
+                      value={wizardData.benchmarkDataManualInput}
+                      onChange={(e) => setWizardData({ ...wizardData, benchmarkDataManualInput: e.target.value })}
+                      className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green h-24"
+                      placeholder="Enter assessment scores and details"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Statewide Assessment Section */}
+            <div className="border-b border-border pb-6">
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Statewide Assessment Scores</h3>
+              
+              <div className="mb-4">
+                <label htmlFor="statewideAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
+                  Assessment Type:
+                </label>
+                <select
+                  id="statewideAssessmentType"
+                  value={wizardData.statewideAssessmentType}
+                  onChange={(e) => setWizardData({ ...wizardData, statewideAssessmentType: e.target.value as WizardData['statewideAssessmentType'] })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                >
+                  <option value="">Select Assessment</option>
+                  <option value="SBAC">SBAC (Smarter Balanced)</option>
+                  <option value="CAA">CAA (California Alternate Assessment)</option>
+                </select>
+              </div>
+
+              {(wizardData.statewideAssessmentType === 'SBAC' || wizardData.statewideAssessmentType === 'CAA') && (
+                <div className="bg-bg-secondary bg-opacity-30 p-4 rounded-lg">
+                  <h4 className="font-medium mb-3 text-text-primary">{wizardData.statewideAssessmentType} Scores</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="statewideAssessmentMath" className="block text-sm font-medium mb-1">Math Overall:</label>
+                      <select
+                        id="statewideAssessmentMath"
+                        className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                      >
+                        <option value="">Select Score</option>
+                        <option value="level1">Standard Not Met (Level 1)</option>
+                        <option value="level2">Standard Nearly Met (Level 2)</option>
+                        <option value="level3">Standard Met (Level 3)</option>
+                        <option value="level4">Standard Exceeded (Level 4)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="statewideAssessmentELA" className="block text-sm font-medium mb-1">English/Language Arts Overall:</label>
+                      <select
+                        id="statewideAssessmentELA"
+                        className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                      >
+                        <option value="">Select Score</option>
+                        <option value="level1">Standard Not Met (Level 1)</option>
+                        <option value="level2">Standard Nearly Met (Level 2)</option>
+                        <option value="level3">Standard Met (Level 3)</option>
+                        <option value="level4">Standard Exceeded (Level 4)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ELPAC Section */}
+            <div>
+              <h3 className="text-lg font-medium mb-4 text-text-primary">ELPAC Scores</h3>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2 text-text-primary">
+                  Did the student take ELPAC?
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="elpacTaken"
+                      value="yes"
+                      className="mr-2"
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="elpacTaken"
+                      value="no"
+                      className="mr-2"
+                    />
+                    No
+                  </label>
                 </div>
               </div>
 
+              {/* ELPAC Scores - Show when Yes is selected */}
+              <div className="bg-bg-secondary bg-opacity-30 p-4 rounded-lg">
+                <h4 className="font-medium mb-3 text-text-primary">ELPAC Proficiency Levels</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="elpacOverall" className="block text-sm font-medium mb-1">Overall Score:</label>
+                    <select
+                      id="elpacOverall"
+                      className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                    >
+                      <option value="">Select Level</option>
+                      <option value="level1">Beginning to Develop (Level 1)</option>
+                      <option value="level2">Somewhat Developed (Level 2)</option>
+                      <option value="level3">Moderately Developed (Level 3)</option>
+                      <option value="level4">Well Developed (Level 4)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="elpacOral" className="block text-sm font-medium mb-1">Oral Language Score:</label>
+                    <select
+                      id="elpacOral"
+                      className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                    >
+                      <option value="">Select Level</option>
+                      <option value="level1">Beginning to Develop (Level 1)</option>
+                      <option value="level2">Somewhat Developed (Level 2)</option>
+                      <option value="level3">Moderately Developed (Level 3)</option>
+                      <option value="level4">Well Developed (Level 4)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="elpacWritten" className="block text-sm font-medium mb-1">Written Language Score:</label>
+                    <select
+                      id="elpacWritten"
+                      className="w-full p-2 border border-border rounded-md bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green"
+                    >
+                      <option value="">Select Level</option>
+                      <option value="level1">Beginning to Develop (Level 1)</option>
+                      <option value="level2">Somewhat Developed (Level 2)</option>
+                      <option value="level3">Moderately Developed (Level 3)</option>
+                      <option value="level4">Well Developed (Level 4)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 4: // Step 5: New Baseline Data & Analysis
+        return (
+          <div className="space-y-8">
+            {/* Baseline Assessments Section */}
+            <div className="border-b border-border pb-6">
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Baseline Assessments</h3>
+              <div className="bg-green bg-opacity-10 border border-green rounded-lg p-4 mb-4">
+                <h4 className="font-medium mb-2 text-green">AI Recommendation</h4>
+                <p className="text-sm text-text-secondary mb-3">
+                  Based on the previous goal information and identified areas of need, we recommend assessing the following domain areas:
+                </p>
+                <div className="bg-bg-primary rounded-md p-3">
+                  <p className="text-sm font-medium">Recommended Assessment Domain: <span className="text-green">Operations & Algebraic Thinking</span></p>
+                  <p className="text-xs text-text-secondary mt-1">
+                    Suggested assessment level: Addition and subtraction within 10 (aligned to K.OA.A.2)
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="newBaselineDomain" className="block text-sm font-medium mb-1 text-text-primary">
+                    Assessment Domain Area:
+                  </label>
+                  <select
+                    id="newBaselineDomain"
+                    value={wizardData.newBaselineDomain}
+                    onChange={(e) => setWizardData({ ...wizardData, newBaselineDomain: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                  >
+                    <option value="">Select Domain</option>
+                    <option value="Operations & Algebraic Thinking">Operations & Algebraic Thinking</option>
+                    <option value="Counting & Cardinality">Counting & Cardinality</option>
+                    <option value="Number & Operations in Base Ten">Number & Operations in Base Ten</option>
+                    <option value="Measurement & Data">Measurement & Data</option>
+                    <option value="Geometry">Geometry</option>
+                    <option value="Reading Foundational Skills">Reading Foundational Skills</option>
+                    <option value="Reading Literature">Reading Literature</option>
+                    <option value="Writing">Writing</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="newBaselineStandardId" className="block text-sm font-medium mb-1 text-text-primary">
+                    CCSS Standard Alignment:
+                  </label>
+                  <select
+                    id="newBaselineStandardId"
+                    value={wizardData.newBaselineStandardId}
+                    onChange={(e) => setWizardData({ ...wizardData, newBaselineStandardId: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                  >
+                    <option value="">Select Standard</option>
+                    {wizardData.newBaselineDomain === 'Operations & Algebraic Thinking' && (
+                      <>
+                        <option value="K.OA.A.1">K.OA.A.1 - Represent addition and subtraction</option>
+                        <option value="K.OA.A.2">K.OA.A.2 - Solve addition and subtraction word problems</option>
+                        <option value="1.OA.A.1">1.OA.A.1 - Use addition and subtraction within 20</option>
+                        <option value="2.OA.A.1">2.OA.A.1 - Use addition and subtraction within 100</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Analysis Section */}
+            <div>
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Data Analysis</h3>
+              
+              {/* Upload Assessment Placeholder */}
+              <div className="mb-6 p-6 border-2 border-dashed border-border rounded-lg text-center bg-bg-secondary bg-opacity-30">
+                <div className="text-text-secondary">
+                  <svg className="mx-auto h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <p className="font-medium">Upload Assessment</p>
+                  <p className="text-sm">Drag and drop your assessment file here, or click to browse</p>
+                  <p className="text-xs mt-1">(Feature coming soon)</p>
+                </div>
+              </div>
+
+              {/* Manual Data Input */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-text-primary">Manual Data Input</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-text-primary">Assessment Area:</label>
+                    <div className="space-y-2">
+                      {['Math', 'Reading', 'Writing'].map((area) => (
+                        <label key={area} className="flex items-center">
+                          <input
+                            type="radio"
+                            name="assessmentArea"
+                            value={area}
+                            className="mr-2 text-green focus:ring-green"
+                          />
+                          {area}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-text-primary">Domain Area:</label>
+                    <select className="w-full p-2 border border-border rounded-md bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green">
+                      <option value="">Select Domain</option>
+                      <option value="operations">Operations & Algebraic Thinking</option>
+                      <option value="counting">Counting & Cardinality</option>
+                      <option value="base-ten">Number & Operations in Base Ten</option>
+                      <option value="measurement">Measurement & Data</option>
+                      <option value="geometry">Geometry</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="newBaselineResultsQuantitative" className="block text-sm font-medium mb-2 text-text-primary">
+                      Assessment Results:
+                    </label>
+                    <textarea
+                      id="newBaselineResultsQuantitative"
+                      value={wizardData.newBaselineResultsQuantitative}
+                      onChange={(e) => setWizardData({ ...wizardData, newBaselineResultsQuantitative: e.target.value })}
+                      className="w-full p-2 border border-border rounded-md bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green h-20"
+                      placeholder="e.g., 4 out of 5 word problems of addition and subtraction correct"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="newBaselineAdditionalInfoQualitative" className="block text-sm font-medium mb-1 text-text-primary">
+                    Additional Information and Observational Data:
+                  </label>
+                  <textarea
+                    id="newBaselineAdditionalInfoQualitative"
+                    value={wizardData.newBaselineAdditionalInfoQualitative}
+                    onChange={(e) => setWizardData({ ...wizardData, newBaselineAdditionalInfoQualitative: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                    placeholder="Describe any additional observations, student behavior during assessment, environmental factors, etc."
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="newBaselineSupportsToIncreaseAccess" className="block text-sm font-medium mb-1 text-text-primary">
+                    Accommodations Provided During Assessment:
+                  </label>
+                  <textarea
+                    id="newBaselineSupportsToIncreaseAccess"
+                    value={wizardData.newBaselineSupportsToIncreaseAccess}
+                    onChange={(e) => setWizardData({ ...wizardData, newBaselineSupportsToIncreaseAccess: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                    placeholder="List any accommodations or supports provided during the baseline assessment (e.g., extended time, visual aids, etc.)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5: // Step 6: Student Accommodations and Supports
+        return (
+          <div className="space-y-8">
+            {/* Accommodations Section */}
+            <div className="border-b border-border pb-6">
+              <h3 className="text-lg font-medium mb-3 text-text-primary">Accommodations</h3>
+              <p className="text-sm text-text-secondary mb-4">
+                Accommodations help students access the same curriculum and meet the same learning goals and expectations as their peers. They change <em>how</em> a student learns, not <em>what</em> they learn.
+              </p>
+              
+              <h4 className="font-medium mb-3 text-text-primary">Select Common Accommodations:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                {[
+                  'Extended Time',
+                  'Preferential Seating',
+                  'Visual Aids/Schedules',
+                  'Manipulatives',
+                  'Frequent Breaks',
+                  'Graphic Organizers',
+                  'Simplified Directions',
+                  'Text-to-Speech',
+                  'Speech-to-Text',
+                  'Note-taker/Copy of Notes',
+                  'Use of Calculator (for specific tasks)',
+                  'Small Group Testing',
+                  'Reduced Distractions Environment'
+                ].map((accommodation) => (
+                  <label key={accommodation} className="flex items-center p-2 hover:bg-bg-secondary rounded-md cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={wizardData.accommodations.includes(accommodation)}
+                      onChange={(e) => handleCheckboxChange('accommodations', accommodation, e.target.checked)}
+                      className="mr-3 text-green focus:ring-green"
+                    />
+                    <span className="text-sm">{accommodation}</span>
+                  </label>
+                ))}
+              </div>
+              
               <div>
                 <label htmlFor="otherAccommodationsText" className="block text-sm font-medium mb-1 text-text-primary">
                   Specify Other Accommodations (if any):
@@ -785,46 +1219,42 @@ const GoalWriting: React.FC = () => {
                   id="otherAccommodationsText"
                   value={wizardData.otherAccommodationsText}
                   onChange={(e) => setWizardData({ ...wizardData, otherAccommodationsText: e.target.value })}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-20"
                   placeholder="Describe any additional accommodations not listed above..."
                 />
               </div>
             </div>
 
             {/* Modifications Section */}
-            <div className="space-y-6 border-t border-border pt-6">
-              <h3 className="text-lg font-medium text-text-primary border-b border-border pb-2">
-                Modifications
-              </h3>
+            <div className="border-b border-border pb-6">
+              <h3 className="text-lg font-medium mb-3 text-text-primary">Modifications</h3>
+              <p className="text-sm text-text-secondary mb-4">
+                Modifications adjust the learning goals or expectations to match the student's individual needs and abilities. They change <em>what</em> a student is expected to learn or demonstrate.
+              </p>
               
-              <div className="p-4 bg-green bg-opacity-5 border border-green border-opacity-20 rounded-lg">
-                <p className="text-sm text-text-secondary">
-                  <strong>Definition:</strong> Modifications adjust the learning goals or expectations to match the student's individual needs and abilities. They change <em>what</em> a student is expected to learn or demonstrate.
-                </p>
+              <h4 className="font-medium mb-3 text-text-primary">Select Common Modifications:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                {[
+                  'Reduced Number of Problems/Tasks',
+                  'Modified Curriculum (e.g., below grade-level content)',
+                  'Alternative Assessment Format',
+                  'Grading Based on IEP Goals/Effort',
+                  'Shorter Assignments',
+                  'Simplified Content/Text',
+                  'Use of Alternate Materials'
+                ].map((modification) => (
+                  <label key={modification} className="flex items-center p-2 hover:bg-bg-secondary rounded-md cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={wizardData.modifications.includes(modification)}
+                      onChange={(e) => handleCheckboxChange('modifications', modification, e.target.checked)}
+                      className="mr-3 text-green focus:ring-green"
+                    />
+                    <span className="text-sm">{modification}</span>
+                  </label>
+                ))}
               </div>
-
-              <div>
-                <h4 className="text-md font-medium text-text-primary mb-3">Select Common Modifications:</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {commonModifications.map((modification) => (
-                    <label key={modification} htmlFor={`modification-${modification}`} className="flex items-center space-x-3 p-3 border border-border rounded-lg hover:border-green hover:bg-green hover:bg-opacity-5 transition-all cursor-pointer">
-                      <input
-                        type="checkbox"
-                        id={`modification-${modification}`}
-                        checked={wizardData.modifications.includes(modification)}
-                        onChange={() => handleCheckboxChange(
-                          modification,
-                          wizardData.modifications,
-                          (newArray) => setWizardData({ ...wizardData, modifications: newArray })
-                        )}
-                        className="text-green focus:ring-green"
-                      />
-                      <span className="text-sm">{modification}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
+              
               <div>
                 <label htmlFor="otherModificationsText" className="block text-sm font-medium mb-1 text-text-primary">
                   Specify Other Modifications (if any):
@@ -833,7 +1263,7 @@ const GoalWriting: React.FC = () => {
                   id="otherModificationsText"
                   value={wizardData.otherModificationsText}
                   onChange={(e) => setWizardData({ ...wizardData, otherModificationsText: e.target.value })}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-20"
                   placeholder="Describe any additional modifications not listed above..."
                 />
               </div>
@@ -841,33 +1271,33 @@ const GoalWriting: React.FC = () => {
 
             {/* Behavioral Supports Section - Conditional */}
             {wizardData.behaviorNeeds === 'yes' && (
-              <div className="space-y-6 border-t border-border pt-6">
-                <h3 className="text-lg font-medium text-text-primary border-b border-border pb-2">
-                  Behavioral Supports
-                </h3>
-
-                <div>
-                  <h4 className="text-md font-medium text-text-primary mb-3">Select Common Behavioral Supports:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {commonBehavioralSupports.map((support) => (
-                      <label key={support} htmlFor={`behavior-support-${support}`} className="flex items-center space-x-3 p-3 border border-border rounded-lg hover:border-green hover:bg-green hover:bg-opacity-5 transition-all cursor-pointer">
-                        <input
-                          type="checkbox"
-                          id={`behavior-support-${support}`}
-                          checked={wizardData.behaviorSupports.includes(support)}
-                          onChange={() => handleCheckboxChange(
-                            support,
-                            wizardData.behaviorSupports,
-                            (newArray) => setWizardData({ ...wizardData, behaviorSupports: newArray })
-                          )}
-                          className="text-green focus:ring-green"
-                        />
-                        <span className="text-sm">{support}</span>
-                      </label>
-                    ))}
-                  </div>
+              <div className="border-b border-border pb-6">
+                <h3 className="text-lg font-medium mb-3 text-text-primary">Behavioral Supports</h3>
+                
+                <h4 className="font-medium mb-3 text-text-primary">Select Common Behavioral Supports:</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                  {[
+                    'First-Then Statements',
+                    'Token Board/Reinforcement System',
+                    'Scheduled Breaks/Movement Breaks',
+                    'Visual Timer',
+                    'Positive Phrasing & Redirection',
+                    'Check-in/Check-out System',
+                    'Clear & Consistent Expectations',
+                    'Social Stories/Scripts'
+                  ].map((support) => (
+                    <label key={support} className="flex items-center p-2 hover:bg-bg-secondary rounded-md cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={wizardData.behaviorSupports.includes(support)}
+                        onChange={(e) => handleCheckboxChange('behaviorSupports', support, e.target.checked)}
+                        className="mr-3 text-green focus:ring-green"
+                      />
+                      <span className="text-sm">{support}</span>
+                    </label>
+                  ))}
                 </div>
-
+                
                 <div>
                   <label htmlFor="otherBehaviorSupportsText" className="block text-sm font-medium mb-1 text-text-primary">
                     Specify Other Behavioral Supports (if any):
@@ -876,7 +1306,7 @@ const GoalWriting: React.FC = () => {
                     id="otherBehaviorSupportsText"
                     value={wizardData.otherBehaviorSupportsText}
                     onChange={(e) => setWizardData({ ...wizardData, otherBehaviorSupportsText: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-20"
                     placeholder="Describe any additional behavioral supports not listed above..."
                   />
                 </div>
@@ -885,33 +1315,32 @@ const GoalWriting: React.FC = () => {
 
             {/* English Learner Supports Section - Conditional */}
             {wizardData.englishLearnerStatus === 'ELL' && (
-              <div className="space-y-6 border-t border-border pt-6">
-                <h3 className="text-lg font-medium text-text-primary border-b border-border pb-2">
-                  English Learner (EL) Supports
-                </h3>
-
-                <div>
-                  <h4 className="text-md font-medium text-text-primary mb-3">Select Common EL Supports:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {commonELSupports.map((support) => (
-                      <label key={support} htmlFor={`el-support-${support}`} className="flex items-center space-x-3 p-3 border border-border rounded-lg hover:border-green hover:bg-green hover:bg-opacity-5 transition-all cursor-pointer">
-                        <input
-                          type="checkbox"
-                          id={`el-support-${support}`}
-                          checked={wizardData.elSelectedSupports.includes(support)}
-                          onChange={() => handleCheckboxChange(
-                            support,
-                            wizardData.elSelectedSupports,
-                            (newArray) => setWizardData({ ...wizardData, elSelectedSupports: newArray })
-                          )}
-                          className="text-green focus:ring-green"
-                        />
-                        <span className="text-sm">{support}</span>
-                      </label>
-                    ))}
-                  </div>
+              <div>
+                <h3 className="text-lg font-medium mb-3 text-text-primary">English Learner (EL) Supports</h3>
+                
+                <h4 className="font-medium mb-3 text-text-primary">Select Common EL Supports:</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                  {[
+                    'Bilingual Dictionary/Glossary',
+                    'Visuals/Realia/Manipulatives',
+                    'Sentence Frames/Starters',
+                    'Native Language Support (when available)',
+                    'Simplified Language/Instructions',
+                    'Graphic Organizers specifically for ELs',
+                    'Peer Tutoring/Partner Work'
+                  ].map((support) => (
+                    <label key={support} className="flex items-center p-2 hover:bg-bg-secondary rounded-md cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={wizardData.elSelectedSupports.includes(support)}
+                        onChange={(e) => handleCheckboxChange('elSelectedSupports', support, e.target.checked)}
+                        className="mr-3 text-green focus:ring-green"
+                      />
+                      <span className="text-sm">{support}</span>
+                    </label>
+                  ))}
                 </div>
-
+                
                 <div>
                   <label htmlFor="elSupports" className="block text-sm font-medium mb-1 text-text-primary">
                     Specify Other EL Supports or Details:
@@ -920,8 +1349,8 @@ const GoalWriting: React.FC = () => {
                     id="elSupports"
                     value={wizardData.elSupports}
                     onChange={(e) => setWizardData({ ...wizardData, elSupports: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                    placeholder="Describe any additional EL supports or provide details about selected supports..."
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-20"
+                    placeholder="Describe any additional EL supports or provide more details about selected supports..."
                   />
                 </div>
               </div>
@@ -929,15 +1358,13 @@ const GoalWriting: React.FC = () => {
           </div>
         );
 
+      // Placeholder cases for the remaining steps
       case 6: return <div>Content for Step 7: Special Factors (Coming Soon)</div>;
       case 7: return <div>Content for Step 8: Draft Present Levels (Coming Soon)</div>;
-      
-      case 8: // Step 9: Propose IEP Goals & Objectives - SMART Tips moved here
+      case 8: // Step 9: Propose IEP Goals & Objectives - Now includes SMART tips
         return (
           <div className="space-y-8">
-            <div>Content for Step 9: Propose IEP Goals & Objectives (Coming Soon)</div>
-            
-            {/* SMART Goal Writing Tips - Moved from main page */}
+            {/* SMART Goal Writing Tips Section */}
             <div className="card bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm">
               <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
                 <Lightbulb className="text-green" size={20} sm:size={22} />
@@ -976,17 +1403,29 @@ const GoalWriting: React.FC = () => {
                     "Ensure goals are functional and meaningful to the student",
                     "Plan for regular progress monitoring and data collection"
                   ].map(practice => (
-                    <p key={practice} className="flex items-start gap-2 text-xs sm:text-sm text-text-secondary">
-                      <span className="w-1.5 h-1.5 bg-green rounded-full mt-[0.3em] sm:mt-[0.4em] flex-shrink-0"></span>
-                      <span>{practice}</span>
-                    </p>
+                     <p key={practice} className="flex items-start gap-2 text-xs sm:text-sm text-text-secondary">
+                        <span className="w-1.5 h-1.5 bg-green rounded-full mt-[0.3em] sm:mt-[0.4em] flex-shrink-0"></span>
+                        <span>{practice}</span>
+                     </p>
                   ))}
                 </div>
               </div>
             </div>
+
+            {/* Goal Proposal Content */}
+            <div>
+              <h3 className="text-lg font-medium mb-4 text-text-primary">AI-Generated Goal Proposal</h3>
+              <p className="text-text-secondary mb-4">
+                Based on all the information provided, here are the recommended IEP goals and objectives:
+              </p>
+              <div className="bg-bg-secondary bg-opacity-30 p-4 rounded-lg">
+                <p className="text-sm text-text-secondary">
+                  Goal proposals will be generated based on the comprehensive data collected in previous steps...
+                </p>
+              </div>
+            </div>
           </div>
         );
-      
       case 9: return <div>Content for Step 10: Related Services (Coming Soon)</div>;
       default:
         return <div>Invalid step or step not yet implemented.</div>;
@@ -1096,26 +1535,28 @@ const GoalWriting: React.FC = () => {
           </p>
           
           {/* Student Selection Dropdown */}
-          <div className="mb-6 sm:mb-8 max-w-md mx-auto">
+          <div className="mb-6">
             <label htmlFor="studentSelect" className="block text-sm font-medium mb-2 text-text-primary">
               Select Student:
             </label>
             <select
               id="studentSelect"
-              value={selectedStudent}
-              onChange={(e) => setSelectedStudent(e.target.value)}
-              className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+              value={selectedStudentForWizard}
+              onChange={(e) => setSelectedStudentForWizard(e.target.value)}
+              className="w-full max-w-md mx-auto p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
             >
               <option value="">Choose a student...</option>
-              {mockStudents.map(student => (
-                <option key={student.id} value={student.id}>{student.name}</option>
+              {mockStudents.map((student) => (
+                <option key={student.id} value={student.id}>
+                  {student.name}
+                </option>
               ))}
             </select>
           </div>
           
           <button
             onClick={handleStartWizard}
-            disabled={!selectedStudent}
+            disabled={!selectedStudentForWizard}
             className="inline-flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-3.5 bg-green text-white rounded-lg sm:rounded-xl font-medium text-base sm:text-lg hover:bg-opacity-90 transition-all duration-200 shadow-lg hover:shadow-green/30 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <Brain size={20} sm:size={24} />
