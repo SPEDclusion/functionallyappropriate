@@ -689,7 +689,6 @@ const GoalWriting: React.FC = () => {
                   <option value="Fine/Gross Motor">Fine/Gross Motor</option>
                 </select>
               </div>
-
               {/* Display Selected Areas */}
               {wizardData.selectedAreas.map((area) => {
                 const domainAreas = getDomainAreas(area, wizardData.currentGradeLevel);
