@@ -684,145 +684,352 @@ const GoalWriting: React.FC = () => {
         );
       case 3: // Step 4: Existing Student Data Input
         return (
-          <div className="space-y-6">
-            <div>
-              <label htmlFor="benchmarkAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
-                Benchmark Assessment Type:
-              </label>
-              <select
-                id="benchmarkAssessmentType"
-                value={wizardData.benchmarkAssessmentType}
-                onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentType: e.target.value as WizardData['benchmarkAssessmentType'] })}
-                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-              >
-                <option value="">Select Assessment Type</option>
-                <option value="NWEA">NWEA MAP</option>
-                <option value="Curriculum-Based">Curriculum-Based Assessment</option>
-                <option value="Benchmark">District Benchmark</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            {wizardData.benchmarkAssessmentType === 'Other' && (
-              <div>
-                <label htmlFor="benchmarkAssessmentOtherName" className="block text-sm font-medium mb-1 text-text-primary">
-                  Specify Other Assessment:
+          <div className="space-y-8">
+            {/* Formative Assessment Section */}
+            <div className="border-b border-border pb-6">
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Formative Assessment Data</h3>
+              
+              <div className="mb-4">
+                <label htmlFor="benchmarkAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
+                  Assessment Type:
                 </label>
-                <input
-                  type="text"
-                  id="benchmarkAssessmentOtherName"
-                  value={wizardData.benchmarkAssessmentOtherName}
-                  onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentOtherName: e.target.value })}
+                <select
+                  id="benchmarkAssessmentType"
+                  value={wizardData.benchmarkAssessmentType}
+                  onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentType: e.target.value as WizardData['benchmarkAssessmentType'] })}
                   className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                  placeholder="Enter assessment name"
-                />
+                >
+                  <option value="">Select Assessment Type</option>
+                  <option value="NWEA">NWEA MAP</option>
+                  <option value="Curriculum-Based">SANDI (Curriculum-Based)</option>
+                  <option value="Benchmark">District Benchmark</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
-            )}
 
-            {wizardData.benchmarkAssessmentType === 'NWEA' && (
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="nweaRitScore" className="block text-sm font-medium mb-1 text-text-primary">
-                    NWEA RIT Score:
+              {wizardData.benchmarkAssessmentType === 'Other' && (
+                <div className="mb-4">
+                  <label htmlFor="benchmarkAssessmentOtherName" className="block text-sm font-medium mb-1 text-text-primary">
+                    Specify Assessment Name:
                   </label>
                   <input
                     type="text"
-                    id="nweaRitScore"
-                    value={wizardData.nweaRitScore}
-                    onChange={(e) => setWizardData({ ...wizardData, nweaRitScore: e.target.value })}
+                    id="benchmarkAssessmentOtherName"
+                    value={wizardData.benchmarkAssessmentOtherName}
+                    onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentOtherName: e.target.value })}
                     className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                    placeholder="Enter RIT score"
+                    placeholder="Enter assessment name"
                   />
                 </div>
-                <div>
-                  <label htmlFor="nweaPercentilePeers" className="block text-sm font-medium mb-1 text-text-primary">
-                    Percentile Compared to Peers:
-                  </label>
-                  <input
-                    type="text"
-                    id="nweaPercentilePeers"
-                    value={wizardData.nweaPercentilePeers}
-                    onChange={(e) => setWizardData({ ...wizardData, nweaPercentilePeers: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                    placeholder="Enter percentile"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="nweaGrowthPercentile" className="block text-sm font-medium mb-1 text-text-primary">
-                    Growth Percentile:
-                  </label>
-                  <input
-                    type="text"
-                    id="nweaGrowthPercentile"
-                    value={wizardData.nweaGrowthPercentile}
-                    onChange={(e) => setWizardData({ ...wizardData, nweaGrowthPercentile: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                    placeholder="Enter growth percentile"
-                  />
-                </div>
-              </div>
-            )}
+              )}
 
-            {wizardData.benchmarkAssessmentType && wizardData.benchmarkAssessmentType !== 'NWEA' && (
-              <div>
-                <label htmlFor="benchmarkDataManualInput" className="block text-sm font-medium mb-1 text-text-primary">
-                  Assessment Data:
-                </label>
-                <textarea
-                  id="benchmarkDataManualInput"
-                  value={wizardData.benchmarkDataManualInput}
-                  onChange={(e) => setWizardData({ ...wizardData, benchmarkDataManualInput: e.target.value })}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                  placeholder="Enter assessment scores, percentiles, and relevant data..."
-                />
-              </div>
-            )}
+              {/* NWEA Specific Fields */}
+              {wizardData.benchmarkAssessmentType === 'NWEA' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Reading Section */}
+                    <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                      <h4 className="font-medium mb-3 text-text-primary">Reading</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="nweaReadingRit" className="block text-xs font-medium mb-1 text-text-primary">
+                            RIT Score:
+                          </label>
+                          <input
+                            type="number"
+                            id="nweaReadingRit"
+                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                            placeholder="e.g., 185"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="nweaReadingPercentile" className="block text-xs font-medium mb-1 text-text-primary">
+                            Percentile (compared to peers):
+                          </label>
+                          <input
+                            type="number"
+                            id="nweaReadingPercentile"
+                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                            placeholder="e.g., 45"
+                            min="1"
+                            max="99"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="nweaReadingGrowth" className="block text-xs font-medium mb-1 text-text-primary">
+                            Growth Percentile:
+                          </label>
+                          <input
+                            type="number"
+                            id="nweaReadingGrowth"
+                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                            placeholder="e.g., 60"
+                            min="1"
+                            max="99"
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-            <div>
-              <label htmlFor="statewideAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
-                Statewide Assessment Type:
-              </label>
-              <select
-                id="statewideAssessmentType"
-                value={wizardData.statewideAssessmentType}
-                onChange={(e) => setWizardData({ ...wizardData, statewideAssessmentType: e.target.value as WizardData['statewideAssessmentType'] })}
-                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-              >
-                <option value="">Select Assessment</option>
-                <option value="SBAC">SBAC</option>
-                <option value="CAA">CAA (California Alternate Assessment)</option>
-              </select>
+                    {/* Math Section */}
+                    <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                      <h4 className="font-medium mb-3 text-text-primary">Math</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="nweaMathRit" className="block text-xs font-medium mb-1 text-text-primary">
+                            RIT Score:
+                          </label>
+                          <input
+                            type="number"
+                            id="nweaMathRit"
+                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                            placeholder="e.g., 190"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="nweaMathPercentile" className="block text-xs font-medium mb-1 text-text-primary">
+                            Percentile (compared to peers):
+                          </label>
+                          <input
+                            type="number"
+                            id="nweaMathPercentile"
+                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                            placeholder="e.g., 35"
+                            min="1"
+                            max="99"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="nweaMathGrowth" className="block text-xs font-medium mb-1 text-text-primary">
+                            Growth Percentile:
+                          </label>
+                          <input
+                            type="number"
+                            id="nweaMathGrowth"
+                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                            placeholder="e.g., 55"
+                            min="1"
+                            max="99"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SANDI Specific Fields */}
+              {wizardData.benchmarkAssessmentType === 'Curriculum-Based' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Reading */}
+                    <div className="p-3 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                      <h4 className="font-medium mb-2 text-text-primary text-sm">Reading</h4>
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                          placeholder="Score"
+                        />
+                        <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm">
+                          <option value="">Level</option>
+                          <option value="1">Level 1</option>
+                          <option value="2">Level 2</option>
+                          <option value="3">Level 3</option>
+                          <option value="4">Level 4</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Writing */}
+                    <div className="p-3 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                      <h4 className="font-medium mb-2 text-text-primary text-sm">Writing</h4>
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                          placeholder="Score"
+                        />
+                        <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm">
+                          <option value="">Level</option>
+                          <option value="1">Level 1</option>
+                          <option value="2">Level 2</option>
+                          <option value="3">Level 3</option>
+                          <option value="4">Level 4</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Math */}
+                    <div className="p-3 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                      <h4 className="font-medium mb-2 text-text-primary text-sm">Math</h4>
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                          placeholder="Score"
+                        />
+                        <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm">
+                          <option value="">Level</option>
+                          <option value="1">Level 1</option>
+                          <option value="2">Level 2</option>
+                          <option value="3">Level 3</option>
+                          <option value="4">Level 4</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Communication */}
+                    <div className="p-3 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                      <h4 className="font-medium mb-2 text-text-primary text-sm">Communication</h4>
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
+                          placeholder="Score"
+                        />
+                        <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm">
+                          <option value="">Level</option>
+                          <option value="1">Level 1</option>
+                          <option value="2">Level 2</option>
+                          <option value="3">Level 3</option>
+                          <option value="4">Level 4</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Manual Input for Other Assessment Types */}
+              {(wizardData.benchmarkAssessmentType === 'Benchmark' || wizardData.benchmarkAssessmentType === 'Other') && (
+                <div>
+                  <label htmlFor="benchmarkDataManualInput" className="block text-sm font-medium mb-1 text-text-primary">
+                    Assessment Results:
+                  </label>
+                  <textarea
+                    id="benchmarkDataManualInput"
+                    value={wizardData.benchmarkDataManualInput}
+                    onChange={(e) => setWizardData({ ...wizardData, benchmarkDataManualInput: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                    placeholder="Enter assessment results and scores..."
+                  />
+                </div>
+              )}
             </div>
 
-            {wizardData.statewideAssessmentType && (
-              <div>
-                <label htmlFor="statewideAssessmentScores" className="block text-sm font-medium mb-1 text-text-primary">
-                  Statewide Assessment Scores:
+            {/* Statewide Assessment Section */}
+            <div className="border-b border-border pb-6">
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Statewide Assessment Data</h3>
+              
+              <div className="mb-4">
+                <label htmlFor="statewideAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
+                  Assessment Type:
                 </label>
-                <textarea
-                  id="statewideAssessmentScores"
-                  value={wizardData.statewideAssessmentScores}
-                  onChange={(e) => setWizardData({ ...wizardData, statewideAssessmentScores: e.target.value })}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                  placeholder="Enter scores, performance levels, and relevant details..."
-                />
+                <select
+                  id="statewideAssessmentType"
+                  value={wizardData.statewideAssessmentType}
+                  onChange={(e) => setWizardData({ ...wizardData, statewideAssessmentType: e.target.value as WizardData['statewideAssessmentType'] })}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                >
+                  <option value="">Select Assessment</option>
+                  <option value="SBAC">SBAC (Smarter Balanced)</option>
+                  <option value="CAA">CAA (California Alternate Assessment)</option>
+                </select>
               </div>
-            )}
 
-            {wizardData.englishLearnerStatus === 'ELL' && (
-              <div>
-                <label htmlFor="elpacScores" className="block text-sm font-medium mb-1 text-text-primary">
-                  ELPAC Scores (English Language Proficiency):
+              {wizardData.statewideAssessmentType && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                    <h4 className="font-medium mb-3 text-text-primary">ELA/Reading</h4>
+                    <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
+                      <option value="">Select Level</option>
+                      <option value="1">Level 1 - Standard Not Met</option>
+                      <option value="2">Level 2 - Standard Nearly Met</option>
+                      <option value="3">Level 3 - Standard Met</option>
+                      <option value="4">Level 4 - Standard Exceeded</option>
+                    </select>
+                  </div>
+
+                  <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                    <h4 className="font-medium mb-3 text-text-primary">Mathematics</h4>
+                    <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
+                      <option value="">Select Level</option>
+                      <option value="1">Level 1 - Standard Not Met</option>
+                      <option value="2">Level 2 - Standard Nearly Met</option>
+                      <option value="3">Level 3 - Standard Met</option>
+                      <option value="4">Level 4 - Standard Exceeded</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ELPAC Section */}
+            <div>
+              <h3 className="text-lg font-medium mb-4 text-text-primary">ELPAC (English Language Proficiency)</h3>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2 text-text-primary">
+                  Has the student taken ELPAC?
                 </label>
-                <textarea
-                  id="elpacScores"
-                  value={wizardData.elpacScores}
-                  onChange={(e) => setWizardData({ ...wizardData, elpacScores: e.target.value })}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                  placeholder="Enter ELPAC overall score and domain scores (Listening, Speaking, Reading, Writing)..."
-                />
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="hasElpac"
+                      value="yes"
+                      className="mr-2"
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="hasElpac"
+                      value="no"
+                      className="mr-2"
+                    />
+                    No
+                  </label>
+                </div>
               </div>
-            )}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                  <h4 className="font-medium mb-3 text-text-primary">Overall Score</h4>
+                  <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
+                    <option value="">Select Level</option>
+                    <option value="1">Level 1 - Minimally Developed</option>
+                    <option value="2">Level 2 - Somewhat Developed</option>
+                    <option value="3">Level 3 - Moderately Developed</option>
+                    <option value="4">Level 4 - Well Developed</option>
+                  </select>
+                </div>
+
+                <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                  <h4 className="font-medium mb-3 text-text-primary">Oral Language</h4>
+                  <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
+                    <option value="">Select Level</option>
+                    <option value="1">Level 1 - Minimally Developed</option>
+                    <option value="2">Level 2 - Somewhat Developed</option>
+                    <option value="3">Level 3 - Moderately Developed</option>
+                    <option value="4">Level 4 - Well Developed</option>
+                  </select>
+                </div>
+
+                <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                  <h4 className="font-medium mb-3 text-text-primary">Written Language</h4>
+                  <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
+                    <option value="">Select Level</option>
+                    <option value="1">Level 1 - Minimally Developed</option>
+                    <option value="2">Level 2 - Somewhat Developed</option>
+                    <option value="3">Level 3 - Moderately Developed</option>
+                    <option value="4">Level 4 - Well Developed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
         );
       case 4: // Step 5: New Baseline Data & Analysis
