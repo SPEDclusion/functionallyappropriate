@@ -2034,7 +2034,6 @@ const GoalWriting: React.FC = () => {
       </div>
     );
   }
-
   // Main component return (non-wizard view) - This part was updated by a previous Bolt prompt
   // based on your request to simplify the main page.
   if (showWizard) {
