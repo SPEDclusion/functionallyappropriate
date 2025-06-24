@@ -687,7 +687,7 @@ const GoalWriting: React.FC = () => {
           </div>
         );
 
-      case 2: // Step 3: Student Context & Supports
+case 2: // Step 3: Student Context & Supports
         return (
           <div className="space-y-6">
             <div>
@@ -698,11 +698,11 @@ const GoalWriting: React.FC = () => {
                 id="anecdotalObservationsGE"
                 value={wizardData.anecdotalObservationsGE}
                 onChange={(e) => setWizardData({ ...wizardData, anecdotalObservationsGE: e.target.value })}
-                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-40"
-                placeholder="Describe observations of the student in the general education classroom, including behavior, participation, social interactions, and learning patterns..."
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Describe observations of the student in the general education classroom, including behavior, participation, and interaction with peers..."
               />
             </div>
-
+            
             <div>
               <label htmlFor="academicStrengthsGeneralInfo" className="block text-sm font-medium mb-1 text-text-primary">
                 Academic Strengths and General Information:
@@ -712,10 +712,10 @@ const GoalWriting: React.FC = () => {
                 value={wizardData.academicStrengthsGeneralInfo}
                 onChange={(e) => setWizardData({ ...wizardData, academicStrengthsGeneralInfo: e.target.value })}
                 className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Describe the student's academic strengths, preferred learning styles, motivating factors, and any other relevant information..."
+                placeholder="Describe the student's academic strengths, preferred learning styles, motivators, and any other relevant information..."
               />
             </div>
-
+            
             <div>
               <label htmlFor="areasOfGrowthQualitative" className="block text-sm font-medium mb-1 text-text-primary">
                 Areas of Growth (Qualitative):
@@ -725,12 +725,11 @@ const GoalWriting: React.FC = () => {
                 value={wizardData.areasOfGrowthQualitative}
                 onChange={(e) => setWizardData({ ...wizardData, areasOfGrowthQualitative: e.target.value })}
                 className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Describe areas where the student needs additional support or shows potential for growth, including academic, behavioral, or social areas..."
+                placeholder="Describe areas where the student needs growth or support, including academic, behavioral, social, or communication needs..."
               />
             </div>
           </div>
         );
-
       case 3: // Step 4: Existing Student Data Input
         return (
           <div className="space-y-8">
