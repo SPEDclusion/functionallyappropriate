@@ -1034,83 +1034,199 @@ const GoalWriting: React.FC = () => {
         );
       case 4: // Step 5: New Baseline Data & Analysis
         return (
-          <div className="space-y-6">
-            <div>
-              <label htmlFor="newBaselineDomain" className="block text-sm font-medium mb-1 text-text-primary">
-                Domain Area for New Baseline:
-              </label>
-              <select
-                id="newBaselineDomain"
-                value={wizardData.newBaselineDomain}
-                onChange={(e) => setWizardData({ ...wizardData, newBaselineDomain: e.target.value })}
-                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-              >
-                <option value="">Select Domain Area</option>
-                <option value="Counting & Cardinality">Counting & Cardinality</option>
-                <option value="Operations & Algebraic Thinking">Operations & Algebraic Thinking</option>
-                <option value="Number & Operations in Base Ten">Number & Operations in Base Ten</option>
-                <option value="Measurement & Data">Measurement & Data</option>
-                <option value="Geometry">Geometry</option>
-                <option value="Reading Foundational Skills">Reading Foundational Skills</option>
-                <option value="Reading Literature">Reading Literature</option>
-                <option value="Reading Informational Text">Reading Informational Text</option>
-                <option value="Writing">Writing</option>
-                <option value="Speaking & Listening">Speaking & Listening</option>
-                <option value="Language">Language</option>
-              </select>
+          <div className="space-y-8">
+            {/* Baseline Assessments Section */}
+            <div className="border-b border-border pb-6">
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Baseline Assessments</h3>
+              
+              {/* AI Recommendation Box */}
+              <div className="mb-6 p-4 bg-green bg-opacity-10 border border-green rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-green rounded-full text-white flex-shrink-0">
+                    <Brain size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-green mb-2">AI Assessment Recommendation</h4>
+                    <p className="text-sm text-text-secondary mb-3">
+                      Based on the previous goal information and student context, we recommend assessing the following domain areas:
+                    </p>
+                    <div className="bg-bg-primary p-3 rounded border border-border">
+                      <p className="text-sm font-medium text-text-primary">
+                        Recommended Domain: <span className="text-green">Operations & Algebraic Thinking</span>
+                      </p>
+                      <p className="text-sm text-text-secondary mt-1">
+                        Suggested Assessment Level: 2nd Grade Standards (K.OA.A.2 - Addition/Subtraction within 10)
+                      </p>
+                      <p className="text-xs text-text-secondary mt-2">
+                        This recommendation is based on the student's previous goal progress and identified areas of need.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Domain and Standard Selection */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label htmlFor="newBaselineDomain" className="block text-sm font-medium mb-1 text-text-primary">
+                    Assessment Domain Area:
+                  </label>
+                  <select
+                    id="newBaselineDomain"
+                    value={wizardData.newBaselineDomain}
+                    onChange={(e) => setWizardData({ ...wizardData, newBaselineDomain: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                  >
+                    <option value="">Select Domain</option>
+                    <option value="Counting & Cardinality">Counting & Cardinality</option>
+                    <option value="Operations & Algebraic Thinking">Operations & Algebraic Thinking</option>
+                    <option value="Number & Operations in Base Ten">Number & Operations in Base Ten</option>
+                    <option value="Measurement & Data">Measurement & Data</option>
+                    <option value="Geometry">Geometry</option>
+                    <option value="Reading Foundational Skills">Reading Foundational Skills</option>
+                    <option value="Reading Literature">Reading Literature</option>
+                    <option value="Reading Informational Text">Reading Informational Text</option>
+                    <option value="Writing">Writing</option>
+                    <option value="Speaking & Listening">Speaking & Listening</option>
+                    <option value="Language">Language</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="newBaselineStandardId" className="block text-sm font-medium mb-1 text-text-primary">
+                    CCSS Standard Alignment:
+                  </label>
+                  <select
+                    id="newBaselineStandardId"
+                    value={wizardData.newBaselineStandardId}
+                    onChange={(e) => setWizardData({ ...wizardData, newBaselineStandardId: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                    disabled={!wizardData.newBaselineDomain}
+                  >
+                    <option value="">Select Standard</option>
+                    {wizardData.newBaselineDomain === 'Operations & Algebraic Thinking' && (
+                      <>
+                        <option value="K.OA.A.2">K.OA.A.2 - Addition/Subtraction within 10</option>
+                        <option value="1.OA.A.1">1.OA.A.1 - Addition/Subtraction within 20</option>
+                        <option value="2.OA.A.1">2.OA.A.1 - Addition/Subtraction within 100</option>
+                      </>
+                    )}
+                    {wizardData.newBaselineDomain === 'Counting & Cardinality' && (
+                      <>
+                        <option value="K.CC.A.1">K.CC.A.1 - Count to 100</option>
+                        <option value="K.CC.B.4">K.CC.B.4 - Number relationships</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+              </div>
             </div>
 
+            {/* Data Analysis Section */}
             <div>
-              <label htmlFor="newBaselineStandardId" className="block text-sm font-medium mb-1 text-text-primary">
-                Target Standard for New Goal:
-              </label>
-              <input
-                type="text"
-                id="newBaselineStandardId"
-                value={wizardData.newBaselineStandardId}
-                onChange={(e) => setWizardData({ ...wizardData, newBaselineStandardId: e.target.value })}
-                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                placeholder="e.g., K.CC.A.1, 1.OA.A.1"
-              />
-            </div>
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Data Analysis</h3>
+              
+              {/* Upload Assessment Placeholder */}
+              <div className="mb-6 p-6 border-2 border-dashed border-border rounded-lg text-center bg-bg-secondary bg-opacity-30">
+                <div className="flex flex-col items-center">
+                  <div className="p-3 bg-green bg-opacity-10 rounded-full mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7,10 12,15 17,10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </div>
+                  <h4 className="font-medium text-text-primary mb-1">Upload Assessment Results</h4>
+                  <p className="text-sm text-text-secondary mb-3">
+                    Drag and drop your assessment files here, or click to browse
+                  </p>
+                  <button className="btn bg-green text-white text-sm px-4 py-2">
+                    Choose Files
+                  </button>
+                  <p className="text-xs text-text-secondary mt-2">
+                    Supported formats: PDF, DOC, DOCX, JPG, PNG
+                  </p>
+                </div>
+              </div>
 
-            <div>
-              <label htmlFor="newBaselineResultsQuantitative" className="block text-sm font-medium mb-1 text-text-primary">
-                New Baseline Results (Quantitative):
-              </label>
-              <textarea
-                id="newBaselineResultsQuantitative"
-                value={wizardData.newBaselineResultsQuantitative}
-                onChange={(e) => setWizardData({ ...wizardData, newBaselineResultsQuantitative: e.target.value })}
-                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Enter specific, measurable baseline data (e.g., 'Correctly identifies 8 out of 20 sight words', 'Solves 3 out of 10 addition problems')..."
-              />
-            </div>
+              {/* Manual Input Options */}
+              <div className="space-y-6">
+                {/* Assessment Area Selection */}
+                <div>
+                  <label className="block text-sm font-medium mb-3 text-text-primary">
+                    Assessment Area:
+                  </label>
+                  <div className="flex gap-6">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="assessmentArea"
+                        value="math"
+                        className="mr-2 text-green focus:ring-green"
+                      />
+                      Math
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="assessmentArea"
+                        value="reading"
+                        className="mr-2 text-green focus:ring-green"
+                      />
+                      Reading
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="assessmentArea"
+                        value="writing"
+                        className="mr-2 text-green focus:ring-green"
+                      />
+                      Writing
+                    </label>
+                  </div>
+                </div>
 
-            <div>
-              <label htmlFor="newBaselineAdditionalInfoQualitative" className="block text-sm font-medium mb-1 text-text-primary">
-                Additional Baseline Information (Qualitative):
-              </label>
-              <textarea
-                id="newBaselineAdditionalInfoQualitative"
-                value={wizardData.newBaselineAdditionalInfoQualitative}
-                onChange={(e) => setWizardData({ ...wizardData, newBaselineAdditionalInfoQualitative: e.target.value })}
-                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Describe qualitative observations during baseline assessment (e.g., student's approach, strategies used, areas of difficulty)..."
-              />
-            </div>
+                {/* Results Input */}
+                <div>
+                  <label htmlFor="newBaselineResultsQuantitative" className="block text-sm font-medium mb-1 text-text-primary">
+                    Quantitative Results:
+                  </label>
+                  <textarea
+                    id="newBaselineResultsQuantitative"
+                    value={wizardData.newBaselineResultsQuantitative}
+                    onChange={(e) => setWizardData({ ...wizardData, newBaselineResultsQuantitative: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                    placeholder="e.g., 4 out of 5 word problems of addition and subtraction correct, 80% accuracy on number identification 1-10"
+                  />
+                </div>
 
-            <div>
-              <label htmlFor="newBaselineSupportsToIncreaseAccess" className="block text-sm font-medium mb-1 text-text-primary">
-                Supports Needed to Increase Access:
-              </label>
-              <textarea
-                id="newBaselineSupportsToIncreaseAccess"
-                value={wizardData.newBaselineSupportsToIncreaseAccess}
-                onChange={(e) => setWizardData({ ...wizardData, newBaselineSupportsToIncreaseAccess: e.target.value })}
-                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Describe accommodations, modifications, or supports that would help the student access this skill area..."
-              />
+                <div>
+                  <label htmlFor="newBaselineAdditionalInfoQualitative" className="block text-sm font-medium mb-1 text-text-primary">
+                    Additional Information and Observational Data:
+                  </label>
+                  <textarea
+                    id="newBaselineAdditionalInfoQualitative"
+                    value={wizardData.newBaselineAdditionalInfoQualitative}
+                    onChange={(e) => setWizardData({ ...wizardData, newBaselineAdditionalInfoQualitative: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                    placeholder="Describe student behavior during assessment, strategies used, areas of difficulty, strengths observed..."
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="newBaselineSupportsToIncreaseAccess" className="block text-sm font-medium mb-1 text-text-primary">
+                    Accommodations Provided During Assessment:
+                  </label>
+                  <textarea
+                    id="newBaselineSupportsToIncreaseAccess"
+                    value={wizardData.newBaselineSupportsToIncreaseAccess}
+                    onChange={(e) => setWizardData({ ...wizardData, newBaselineSupportsToIncreaseAccess: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                    placeholder="List any accommodations provided during the assessment (e.g., extended time, visual aids, manipulatives, etc.)"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         );
