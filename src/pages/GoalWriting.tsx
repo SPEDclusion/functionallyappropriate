@@ -41,6 +41,20 @@ interface WizardStep {
   icon: React.ReactNode;
 }
 
+// Interface for related services
+interface RelatedService {
+  id: string;
+  serviceType: string;
+  serviceOtherName: string;
+  duration: string;
+  frequency: string;
+  delivery: string;
+  location: string;
+  comments: string;
+  startDate: string;
+  endDate: string;
+}
+
 // NEW/UPDATED WizardData Interface for all 10 steps
 interface WizardData {
   // Step 1: Student Demographics
@@ -118,15 +132,7 @@ interface WizardData {
   draftObjective3: string;
 
   // Step 10: Related Services
-  relatedServiceType: 'SAI' | 'BIS' | 'Other' | '';
-  relatedServiceOtherName: string;
-  relatedServiceDuration: string;
-  relatedServiceFrequency: 'weekly' | 'monthly' | 'daily' | '';
-  relatedServiceDelivery: 'individual' | 'group' | '';
-  relatedServiceLocation: string;
-  relatedServiceComments: string;
-  relatedServiceStartDate: string;
-  relatedServiceEndDate: string;
+  relatedServices: RelatedService[];
 }
 
 const GoalWriting: React.FC = () => {
@@ -222,15 +228,7 @@ const GoalWriting: React.FC = () => {
     draftObjective1: '',
     draftObjective2: '',
     draftObjective3: '',
-    relatedServiceType: '',
-    relatedServiceOtherName: '',
-    relatedServiceDuration: '',
-    relatedServiceFrequency: '',
-    relatedServiceDelivery: '',
-    relatedServiceLocation: '',
-    relatedServiceComments: '',
-    relatedServiceStartDate: '',
-    relatedServiceEndDate: '',
+    relatedServices: [],
   });
 
   // UPDATED wizardSteps array for the new 10-step flow
@@ -266,7 +264,7 @@ const GoalWriting: React.FC = () => {
       accommodations: [], modifications: [], behaviorNeeds: '', behaviorSupports: [], elSupports: '', otherAccommodationsText: '', otherModificationsText: '', otherBehaviorSupportsText: '', elSelectedSupports: [],
       assistiveTechNeeded: '', assistiveTechRationale: '', blindVisualImpairment: '', deafHardOfHearing: '', behaviorImpedingLearning: '', behaviorInterventionsStrategies: '',
       draftPresentLevels: '', draftAnnualGoal: '', draftObjective1: '', draftObjective2: '', draftObjective3: '',
-      relatedServiceType: '', relatedServiceOtherName: '', relatedServiceDuration: '', relatedServiceFrequency: '', relatedServiceDelivery: '', relatedServiceLocation: '', relatedServiceComments: '', relatedServiceStartDate: '', relatedServiceEndDate: '',
+      relatedServices: [],
     });
   };
 
@@ -311,6 +309,42 @@ const GoalWriting: React.FC = () => {
       case 'completed': return 'bg-blue-500 text-white';
       default: return 'bg-gray-400 text-white';
     }
+  };
+
+  // Helper functions for related services
+  const addNewService = () => {
+    const newService: RelatedService = {
+      id: Date.now().toString(),
+      serviceType: '',
+      serviceOtherName: '',
+      duration: '',
+      frequency: '',
+      delivery: '',
+      location: '',
+      comments: '',
+      startDate: '',
+      endDate: '',
+    };
+    setWizardData({
+      ...wizardData,
+      relatedServices: [...wizardData.relatedServices, newService]
+    });
+  };
+
+  const removeService = (serviceId: string) => {
+    setWizardData({
+      ...wizardData,
+      relatedServices: wizardData.relatedServices.filter(service => service.id !== serviceId)
+    });
+  };
+
+  const updateService = (serviceId: string, field: keyof RelatedService, value: string) => {
+    setWizardData({
+      ...wizardData,
+      relatedServices: wizardData.relatedServices.map(service =>
+        service.id === serviceId ? { ...service, [field]: value } : service
+      )
+    });
   };
 
   const renderWizardStep = () => {
@@ -1671,14 +1705,13 @@ const GoalWriting: React.FC = () => {
             </div>
           </div>
         );
-      // Placeholder cases for the remaining steps
-    case 8: // Step 9: Propose IEP Goals & Objectives - Now includes SMART tips
+      case 8: // Step 9: Propose IEP Goals & Objectives - Now includes SMART tips
         return (
           <div className="space-y-8">
             {/* SMART Goal Writing Tips Section */}
             <div className="card bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm">
               <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
-                <Lightbulb className="text-green" size={20} sm:size={22} />
+                <Lightbulb className="text-green" size={20} />
                 <h2 className="text-xl sm:text-2xl font-medium">SMART Goal Writing Tips</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
@@ -1948,19 +1981,15 @@ const GoalWriting: React.FC = () => {
         return <div>Invalid step or step not yet implemented.</div>;
     }
   };
-    }
-  };
 
-  // Main component return (non-wizard view) - This part was updated by a previous Bolt prompt
-  // based on your request to simplify the main page.
+  // Main component return (non-wizard view)
   if (showWizard) {
-    // This is the existing wizard shell from your code, now driven by the new wizardSteps and currentStep
     return (
       <div className="animate-fade-in">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-3xl font-medium">AI-Assisted Goal Creation</h1> {/* This title can be updated if needed */}
+              <h1 className="text-3xl font-medium">AI-Assisted Goal Creation</h1>
               <button
                 onClick={() => setShowWizard(false)}
                 className="p-2 hover:bg-bg-secondary rounded-lg transition-colors"
@@ -1977,7 +2006,7 @@ const GoalWriting: React.FC = () => {
                     index < currentStep ? 'bg-green-200 text-green border-green-200' : 
                     'border-border text-text-secondary'
                   }`}>
-                    {index < currentStep ? <Check size={16} smSize={20} /> : <span className="text-xs sm:text-sm font-medium">{index + 1}</span>}
+                    {index < currentStep ? <Check size={16} /> : <span className="text-xs sm:text-sm font-medium">{index + 1}</span>}
                   </div>
                   <div className="ml-2 sm:ml-3 text-left min-w-max">
                      <p className={`text-xs sm:text-sm font-medium truncate ${index === currentStep ? 'text-green' : 'text-text-secondary'}`}>{step.title}</p>
@@ -1992,7 +2021,7 @@ const GoalWriting: React.FC = () => {
           <div className="card">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
-                {wizardSteps[currentStep]?.icon || <Sparkles className="text-green" size={24} />} {/* Fallback icon */}
+                {wizardSteps[currentStep]?.icon || <Sparkles className="text-green" size={24} />}
                 <h2 className="text-2xl font-medium">{wizardSteps[currentStep]?.title || 'Loading Step...'}</h2>
               </div>
               <p className="text-text-secondary">{wizardSteps[currentStep]?.description || 'Please wait...'}</p>
@@ -2013,90 +2042,7 @@ const GoalWriting: React.FC = () => {
               </button>
               {currentStep === wizardSteps.length - 1 ? (
                 <button
-                  onClick={handleGenerateGoal} // This will eventually be "Save/Finalize IEP" or similar
-                  className="flex items-center gap-2 px-7 py-2.5 bg-green text-white rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200 shadow-md hover:shadow-lg"
-                >
-                  <Sparkles size={18} />
-                  Finalize & Generate Documents (Placeholder)
-                </button>
-              ) : (
-                <button
-                  onClick={handleNextStep}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-green text-white rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200"
-                >
-                  Next
-                  <ArrowRight size={18} />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  // Main component return (non-wizard view) - This part was updated by a previous Bolt prompt
-  // based on your request to simplify the main page.
-  if (showWizard) {
-    // This is the existing wizard shell from your code, now driven by the new wizardSteps and currentStep
-    return (
-      <div className="animate-fade-in">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-3xl font-medium">AI-Assisted Goal Creation</h1> {/* This title can be updated if needed */}
-              <button
-                onClick={() => setShowWizard(false)}
-                className="p-2 hover:bg-bg-secondary rounded-lg transition-colors"
-                aria-label="Close Wizard"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="flex items-center space-x-2 sm:space-x-4 mb-6 overflow-x-auto pb-2">
-              {wizardSteps.map((step, index) => (
-                <div key={step.id} className="flex items-center flex-shrink-0">
-                  <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-all duration-300 ${
-                    index === currentStep ? 'bg-green text-white border-green scale-110' : 
-                    index < currentStep ? 'bg-green-200 text-green border-green-200' : 
-                    'border-border text-text-secondary'
-                  }`}>
-                    {index < currentStep ? <Check size={16} smSize={20} /> : <span className="text-xs sm:text-sm font-medium">{index + 1}</span>}
-                  </div>
-                  <div className="ml-2 sm:ml-3 text-left min-w-max">
-                     <p className={`text-xs sm:text-sm font-medium truncate ${index === currentStep ? 'text-green' : 'text-text-secondary'}`}>{step.title}</p>
-                  </div>
-                  {index < wizardSteps.length - 1 && (
-                     <div className={`hidden sm:block w-8 sm:w-12 h-0.5 mx-2 sm:mx-3 transition-all duration-300 ${index < currentStep ? 'bg-green' : 'bg-border'}`} />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="card">
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-2">
-                {wizardSteps[currentStep]?.icon || <Sparkles className="text-green" size={24} />} {/* Fallback icon */}
-                <h2 className="text-2xl font-medium">{wizardSteps[currentStep]?.title || 'Loading Step...'}</h2>
-              </div>
-              <p className="text-text-secondary">{wizardSteps[currentStep]?.description || 'Please wait...'}</p>
-            </div>
-            <div className="min-h-[300px]">
-              {renderWizardStep()}
-            </div>
-            <div className="flex justify-between items-center pt-6 border-t border-border mt-6">
-              <button
-                onClick={handlePrevStep}
-                disabled={currentStep === 0}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                  currentStep === 0 ? 'text-text-disabled' : 'text-green hover:bg-green hover:bg-opacity-10 border border-green border-opacity-30'
-                }`}
-              >
-                <ArrowLeft size={18} />
-                Previous
-              </button>
-              {currentStep === wizardSteps.length - 1 ? (
-                <button
-                  onClick={handleGenerateGoal} // This will eventually be "Save/Finalize IEP" or similar
+                  onClick={handleGenerateGoal}
                   className="flex items-center gap-2 px-7 py-2.5 bg-green text-white rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200 shadow-md hover:shadow-lg"
                 >
                   <Sparkles size={18} />
@@ -2123,13 +2069,12 @@ const GoalWriting: React.FC = () => {
     <div className="animate-fade-in">
       <div className="flex justify-between items-center mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-medium tracking-tight">IEP Development Studio</h1>
-        {/* Removed Manual Goal button as per previous request */}
       </div>
 
       <div className="card mb-8 bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm hover:shadow-lg">
         <div className="text-center py-10 sm:py-16 px-4">
           <div className="inline-block p-3 sm:p-4 bg-green/10 rounded-full mb-5 sm:mb-6">
-            <Sparkles className="text-green" size={32} sm:size={48} />
+            <Sparkles className="text-green" size={32} />
           </div>
           <h2 className="text-xl sm:text-3xl font-semibold mb-3 sm:mb-4">AI-Assisted IEP Development</h2>
           <p className="text-text-secondary text-sm sm:text-lg mb-6 sm:mb-8 max-w-xl sm:max-w-2xl mx-auto leading-relaxed">
@@ -2159,9 +2104,9 @@ const GoalWriting: React.FC = () => {
             disabled={!selectedStudentId}
             className="inline-flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-3.5 bg-green text-white rounded-lg sm:rounded-xl font-medium text-base sm:text-lg hover:bg-opacity-90 transition-all duration-200 shadow-lg hover:shadow-green/30 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            <Brain size={20} sm:size={24} />
+            <Brain size={20} />
             Let's Start Building
-            <ArrowRight size={20} sm:size={24} />
+            <ArrowRight size={20} />
           </button>
         </div>
       </div>
