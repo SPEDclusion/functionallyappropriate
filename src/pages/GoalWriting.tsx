@@ -41,6 +41,20 @@ interface WizardStep {
   icon: React.ReactNode;
 }
 
+// Interface for related service entries
+interface RelatedServiceEntry {
+  id: string;
+  serviceType: string;
+  serviceOtherName: string;
+  duration: string;
+  frequency: string;
+  delivery: string;
+  location: string;
+  comments: string;
+  startDate: string;
+  endDate: string;
+}
+
 // NEW/UPDATED WizardData Interface for all 10 steps
 interface WizardData {
   // Step 1: Student Demographics
@@ -118,15 +132,7 @@ interface WizardData {
   draftObjective3: string;
 
   // Step 10: Related Services
-  relatedServiceType: 'SAI' | 'BIS' | 'Other' | '';
-  relatedServiceOtherName: string;
-  relatedServiceDuration: string;
-  relatedServiceFrequency: 'weekly' | 'monthly' | 'daily' | '';
-  relatedServiceDelivery: 'individual' | 'group' | '';
-  relatedServiceLocation: string;
-  relatedServiceComments: string;
-  relatedServiceStartDate: string;
-  relatedServiceEndDate: string;
+  relatedServices: RelatedServiceEntry[];
 }
 
 const GoalWriting: React.FC = () => {
@@ -153,16 +159,6 @@ const GoalWriting: React.FC = () => {
 
   const [showWizard, setShowWizard] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
-
-  // Mock students for dropdown
-  const mockStudents = [
-    { id: 's1', name: 'Leo Gonzalez' },
-    { id: 's2', name: 'Mia Patel' },
-    { id: 's3', name: 'Alex Chen' },
-    { id: 's4', name: 'Maria Rodriguez' },
-    { id: 's5', name: 'Jordan Kim' },
-  ];
 
   // UPDATED useState for wizardData with ALL new fields
   const [wizardData, setWizardData] = useState<WizardData>({
@@ -222,15 +218,7 @@ const GoalWriting: React.FC = () => {
     draftObjective1: '',
     draftObjective2: '',
     draftObjective3: '',
-    relatedServiceType: '',
-    relatedServiceOtherName: '',
-    relatedServiceDuration: '',
-    relatedServiceFrequency: '',
-    relatedServiceDelivery: '',
-    relatedServiceLocation: '',
-    relatedServiceComments: '',
-    relatedServiceStartDate: '',
-    relatedServiceEndDate: '',
+    relatedServices: [],
   });
 
   // UPDATED wizardSteps array for the new 10-step flow
@@ -251,14 +239,10 @@ const GoalWriting: React.FC = () => {
 
   // UPDATED handleStartWizard to reset ALL new fields
   const handleStartWizard = () => {
-    // Pre-populate student name if one is selected
-    const selectedStudent = mockStudents.find(s => s.id === selectedStudentId);
-    const studentName = selectedStudent ? selectedStudent.name : '';
-    
     setShowWizard(true);
     setCurrentStep(0);
     setWizardData({
-      studentName: studentName, currentGradeLevel: 'K', schoolName: '', primaryDisability: '', secondaryDisability: '', studentInterestsGeneralInfo: '', englishLearnerStatus: '',
+      studentName: '', currentGradeLevel: 'K', schoolName: '', primaryDisability: '', secondaryDisability: '', studentInterestsGeneralInfo: '', englishLearnerStatus: '',
       previousGoalDomain: '', previousGoalStandardId: '', previousGoalAnnualGoalText: '', previousGoalProgressStatus: '', previousGoalContinuedNeed: '', showPreviousObjectives: false, previousObjective1Text: '', previousObjective1Status: '', previousObjective2Text: '', previousObjective2Status: '', previousObjective3Text: '', previousObjective3Status: '',
       anecdotalObservationsGE: '', academicStrengthsGeneralInfo: '', areasOfGrowthQualitative: '',
       benchmarkAssessmentType: '', benchmarkAssessmentOtherName: '', benchmarkDataManualInput: '', nweaRitScore: '', nweaPercentilePeers: '', nweaGrowthPercentile: '', statewideAssessmentType: '', statewideAssessmentScores: '', elpacScores: '',
@@ -266,7 +250,7 @@ const GoalWriting: React.FC = () => {
       accommodations: [], modifications: [], behaviorNeeds: '', behaviorSupports: [], elSupports: '', otherAccommodationsText: '', otherModificationsText: '', otherBehaviorSupportsText: '', elSelectedSupports: [],
       assistiveTechNeeded: '', assistiveTechRationale: '', blindVisualImpairment: '', deafHardOfHearing: '', behaviorImpedingLearning: '', behaviorInterventionsStrategies: '',
       draftPresentLevels: '', draftAnnualGoal: '', draftObjective1: '', draftObjective2: '', draftObjective3: '',
-      relatedServiceType: '', relatedServiceOtherName: '', relatedServiceDuration: '', relatedServiceFrequency: '', relatedServiceDelivery: '', relatedServiceLocation: '', relatedServiceComments: '', relatedServiceStartDate: '', relatedServiceEndDate: '',
+      relatedServices: [],
     });
   };
 
@@ -311,6 +295,42 @@ const GoalWriting: React.FC = () => {
       case 'completed': return 'bg-blue-500 text-white';
       default: return 'bg-gray-400 text-white';
     }
+  };
+
+  // Helper functions for related services
+  const addNewService = () => {
+    const newService: RelatedServiceEntry = {
+      id: Date.now().toString(),
+      serviceType: '',
+      serviceOtherName: '',
+      duration: '',
+      frequency: '',
+      delivery: '',
+      location: '',
+      comments: '',
+      startDate: '',
+      endDate: '',
+    };
+    setWizardData({
+      ...wizardData,
+      relatedServices: [...wizardData.relatedServices, newService]
+    });
+  };
+
+  const removeService = (serviceId: string) => {
+    setWizardData({
+      ...wizardData,
+      relatedServices: wizardData.relatedServices.filter(service => service.id !== serviceId)
+    });
+  };
+
+  const updateService = (serviceId: string, field: keyof RelatedServiceEntry, value: string) => {
+    setWizardData({
+      ...wizardData,
+      relatedServices: wizardData.relatedServices.map(service =>
+        service.id === serviceId ? { ...service, [field]: value } : service
+      )
+    });
   };
 
   const renderWizardStep = () => {
@@ -424,6 +444,7 @@ const GoalWriting: React.FC = () => {
       case 1: // Step 2: Previous IEP Goals Review
         return (
           <div className="space-y-6">
+            {/* Domain Area Selection */}
             <div>
               <label htmlFor="previousGoalDomain" className="block text-sm font-medium mb-1 text-text-primary">
                 Domain Area of Previous Goal:
@@ -449,38 +470,33 @@ const GoalWriting: React.FC = () => {
               </select>
             </div>
 
-            {wizardData.previousGoalDomain && (
-              <div>
-                <label htmlFor="previousGoalStandardId" className="block text-sm font-medium mb-1 text-text-primary">
-                  Grade Level Standard Alignment of Previous Goal:
-                </label>
-                <select
-                  id="previousGoalStandardId"
-                  value={wizardData.previousGoalStandardId}
-                  onChange={(e) => setWizardData({ ...wizardData, previousGoalStandardId: e.target.value })}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                >
-                  <option value="">Select Standard</option>
-                  {wizardData.previousGoalDomain === 'Operations & Algebraic Thinking' && (
-                    <>
-                      <option value="K.OA.A.2">K.OA.A.2</option>
-                      <option value="1.OA.A.1">1.OA.A.1</option>
-                    </>
-                  )}
-                  {wizardData.previousGoalDomain === 'Counting & Cardinality' && (
-                    <>
-                      <option value="K.CC.A.1">K.CC.A.1</option>
-                      <option value="K.CC.B.4">K.CC.B.4</option>
-                    </>
-                  )}
-                  {/* Add more standards for other domains as needed */}
-                </select>
-                <p className="text-xs text-text-secondary mt-1">
-                  Note: Select Domain Area first to see relevant standards. Full list will be populated from CCSS data.
-                </p>
-              </div>
-            )}
+            {/* Grade Level Standard Alignment */}
+            <div>
+              <label htmlFor="previousGoalStandardId" className="block text-sm font-medium mb-1 text-text-primary">
+                Grade Level Standard Alignment of Previous Goal:
+              </label>
+              <select
+                id="previousGoalStandardId"
+                value={wizardData.previousGoalStandardId}
+                onChange={(e) => setWizardData({ ...wizardData, previousGoalStandardId: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                disabled={!wizardData.previousGoalDomain}
+              >
+                <option value="">Select Standard</option>
+                {wizardData.previousGoalDomain === 'Operations & Algebraic Thinking' && (
+                  <>
+                    <option value="K.OA.A.2">K.OA.A.2</option>
+                    <option value="1.OA.A.1">1.OA.A.1</option>
+                  </>
+                )}
+                {/* Add more standards for other domains as needed */}
+              </select>
+              <p className="text-xs text-text-secondary mt-1">
+                Note: Select Domain Area first to see relevant standards. Full list will be populated from CCSS data.
+              </p>
+            </div>
 
+            {/* Previous IEP Annual Goal Text */}
             <div>
               <label htmlFor="previousGoalAnnualGoalText" className="block text-sm font-medium mb-1 text-text-primary">
                 Previous IEP Annual Goal Text:
@@ -494,6 +510,7 @@ const GoalWriting: React.FC = () => {
               />
             </div>
 
+            {/* Progress Status and Continued Need */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="previousGoalProgressStatus" className="block text-sm font-medium mb-1 text-text-primary">
@@ -514,7 +531,6 @@ const GoalWriting: React.FC = () => {
                   <option value="not_annual_goal">Not Annual Goal</option>
                 </select>
               </div>
-
               <div>
                 <label htmlFor="previousGoalContinuedNeed" className="block text-sm font-medium mb-1 text-text-primary">
                   Is this a Continued Area of Need?
@@ -532,109 +548,111 @@ const GoalWriting: React.FC = () => {
               </div>
             </div>
 
-            <div className="border-t border-border pt-6">
-              <h4 className="text-lg font-medium mb-4 text-text-primary">Previous Short-Term Objectives (Optional)</h4>
+            {/* Previous Short-Term Objectives */}
+            <div className="mt-8">
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Previous Short-Term Objectives (Optional)</h3>
               
-              <div className="space-y-6">
-                <div className="p-4 border border-border rounded-lg">
-                  <h5 className="font-medium mb-2 text-text-primary">Objective 1:</h5>
-                  <div className="space-y-3">
-                    <div>
-                      <label htmlFor="previousObjective1Text" className="block text-sm font-medium mb-1 text-text-primary">
-                        Objective Text:
-                      </label>
-                      <textarea
-                        id="previousObjective1Text"
-                        value={wizardData.previousObjective1Text}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective1Text: e.target.value })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                        placeholder="Enter the first short-term objective..."
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="previousObjective1Status" className="block text-sm font-medium mb-1 text-text-primary">
-                        Status:
-                      </label>
-                      <select
-                        id="previousObjective1Status"
-                        value={wizardData.previousObjective1Status}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective1Status: e.target.value as WizardData['previousObjective1Status'] })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                      >
-                        <option value="">Select Status</option>
-                        <option value="met">Met</option>
-                        <option value="partially_met">Partially Met</option>
-                        <option value="not_met">Not Met</option>
-                      </select>
-                    </div>
+              {/* Objective 1 */}
+              <div className="border border-border rounded-lg p-4 mb-4">
+                <h4 className="font-medium mb-3 text-text-primary">Objective 1:</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="previousObjective1Text" className="block text-sm font-medium mb-1 text-text-primary">
+                      Objective Text:
+                    </label>
+                    <textarea
+                      id="previousObjective1Text"
+                      value={wizardData.previousObjective1Text}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective1Text: e.target.value })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                      placeholder="Enter the first short-term objective..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="previousObjective1Status" className="block text-sm font-medium mb-1 text-text-primary">
+                      Status:
+                    </label>
+                    <select
+                      id="previousObjective1Status"
+                      value={wizardData.previousObjective1Status}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective1Status: e.target.value as WizardData['previousObjective1Status'] })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="met">Met</option>
+                      <option value="partially_met">Partially Met</option>
+                      <option value="not_met">Not Met</option>
+                    </select>
                   </div>
                 </div>
+              </div>
 
-                <div className="p-4 border border-border rounded-lg">
-                  <h5 className="font-medium mb-2 text-text-primary">Objective 2:</h5>
-                  <div className="space-y-3">
-                    <div>
-                      <label htmlFor="previousObjective2Text" className="block text-sm font-medium mb-1 text-text-primary">
-                        Objective Text:
-                      </label>
-                      <textarea
-                        id="previousObjective2Text"
-                        value={wizardData.previousObjective2Text}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective2Text: e.target.value })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                        placeholder="Enter the second short-term objective..."
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="previousObjective2Status" className="block text-sm font-medium mb-1 text-text-primary">
-                        Status:
-                      </label>
-                      <select
-                        id="previousObjective2Status"
-                        value={wizardData.previousObjective2Status}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective2Status: e.target.value as WizardData['previousObjective2Status'] })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                      >
-                        <option value="">Select Status</option>
-                        <option value="met">Met</option>
-                        <option value="partially_met">Partially Met</option>
-                        <option value="not_met">Not Met</option>
-                      </select>
-                    </div>
+              {/* Objective 2 */}
+              <div className="border border-border rounded-lg p-4 mb-4">
+                <h4 className="font-medium mb-3 text-text-primary">Objective 2:</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="previousObjective2Text" className="block text-sm font-medium mb-1 text-text-primary">
+                      Objective Text:
+                    </label>
+                    <textarea
+                      id="previousObjective2Text"
+                      value={wizardData.previousObjective2Text}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective2Text: e.target.value })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                      placeholder="Enter the second short-term objective..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="previousObjective2Status" className="block text-sm font-medium mb-1 text-text-primary">
+                      Status:
+                    </label>
+                    <select
+                      id="previousObjective2Status"
+                      value={wizardData.previousObjective2Status}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective2Status: e.target.value as WizardData['previousObjective2Status'] })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="met">Met</option>
+                      <option value="partially_met">Partially Met</option>
+                      <option value="not_met">Not Met</option>
+                    </select>
                   </div>
                 </div>
+              </div>
 
-                <div className="p-4 border border-border rounded-lg">
-                  <h5 className="font-medium mb-2 text-text-primary">Objective 3:</h5>
-                  <div className="space-y-3">
-                    <div>
-                      <label htmlFor="previousObjective3Text" className="block text-sm font-medium mb-1 text-text-primary">
-                        Objective Text:
-                      </label>
-                      <textarea
-                        id="previousObjective3Text"
-                        value={wizardData.previousObjective3Text}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective3Text: e.target.value })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                        placeholder="Enter the third short-term objective..."
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="previousObjective3Status" className="block text-sm font-medium mb-1 text-text-primary">
-                        Status:
-                      </label>
-                      <select
-                        id="previousObjective3Status"
-                        value={wizardData.previousObjective3Status}
-                        onChange={(e) => setWizardData({ ...wizardData, previousObjective3Status: e.target.value as WizardData['previousObjective3Status'] })}
-                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                      >
-                        <option value="">Select Status</option>
-                        <option value="met">Met</option>
-                        <option value="partially_met">Partially Met</option>
-                        <option value="not_met">Not Met</option>
-                      </select>
-                    </div>
+              {/* Objective 3 */}
+              <div className="border border-border rounded-lg p-4">
+                <h4 className="font-medium mb-3 text-text-primary">Objective 3:</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="previousObjective3Text" className="block text-sm font-medium mb-1 text-text-primary">
+                      Objective Text:
+                    </label>
+                    <textarea
+                      id="previousObjective3Text"
+                      value={wizardData.previousObjective3Text}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective3Text: e.target.value })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                      placeholder="Enter the third short-term objective..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="previousObjective3Status" className="block text-sm font-medium mb-1 text-text-primary">
+                      Status:
+                    </label>
+                    <select
+                      id="previousObjective3Status"
+                      value={wizardData.previousObjective3Status}
+                      onChange={(e) => setWizardData({ ...wizardData, previousObjective3Status: e.target.value as WizardData['previousObjective3Status'] })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="met">Met</option>
+                      <option value="partially_met">Partially Met</option>
+                      <option value="not_met">Not Met</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -653,7 +671,7 @@ const GoalWriting: React.FC = () => {
                 value={wizardData.anecdotalObservationsGE}
                 onChange={(e) => setWizardData({ ...wizardData, anecdotalObservationsGE: e.target.value })}
                 className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Describe how the student participates in general education settings, interactions with peers, behavior patterns, engagement levels..."
+                placeholder="Describe how the student participates in general education settings, interactions with peers, learning preferences..."
               />
             </div>
             <div>
@@ -665,7 +683,7 @@ const GoalWriting: React.FC = () => {
                 value={wizardData.academicStrengthsGeneralInfo}
                 onChange={(e) => setWizardData({ ...wizardData, academicStrengthsGeneralInfo: e.target.value })}
                 className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Describe the student's academic strengths, preferred learning styles, subjects they excel in..."
+                placeholder="Describe the student's academic strengths, what they do well, areas of interest..."
               />
             </div>
             <div>
@@ -684,549 +702,234 @@ const GoalWriting: React.FC = () => {
         );
       case 3: // Step 4: Existing Student Data Input
         return (
-          <div className="space-y-8">
-            {/* Formative Assessment Section */}
-            <div className="border-b border-border pb-6">
-              <h3 className="text-lg font-medium mb-4 text-text-primary">Formative Assessment Data</h3>
-              
-              <div className="mb-4">
-                <label htmlFor="benchmarkAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
-                  Assessment Type:
-                </label>
-                <select
-                  id="benchmarkAssessmentType"
-                  value={wizardData.benchmarkAssessmentType}
-                  onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentType: e.target.value as WizardData['benchmarkAssessmentType'] })}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                >
-                  <option value="">Select Assessment Type</option>
-                  <option value="NWEA">NWEA MAP</option>
-                  <option value="Curriculum-Based">SANDI (Curriculum-Based)</option>
-                  <option value="Benchmark">District Benchmark</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              {wizardData.benchmarkAssessmentType === 'Other' && (
-                <div className="mb-4">
-                  <label htmlFor="benchmarkAssessmentOtherName" className="block text-sm font-medium mb-1 text-text-primary">
-                    Specify Assessment Name:
+          <div className="space-y-6">
+            {/* Benchmark Assessment Section */}
+            <div className="border border-border rounded-lg p-4">
+              <h3 className="text-lg font-medium mb-4 text-text-primary">Benchmark Assessment Data</h3>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="benchmarkAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
+                    Type of Benchmark Assessment:
                   </label>
-                  <input
-                    type="text"
-                    id="benchmarkAssessmentOtherName"
-                    value={wizardData.benchmarkAssessmentOtherName}
-                    onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentOtherName: e.target.value })}
+                  <select
+                    id="benchmarkAssessmentType"
+                    value={wizardData.benchmarkAssessmentType}
+                    onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentType: e.target.value as WizardData['benchmarkAssessmentType'] })}
                     className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                    placeholder="Enter assessment name"
-                  />
+                  >
+                    <option value="">Select Assessment Type</option>
+                    <option value="NWEA">NWEA MAP</option>
+                    <option value="Curriculum-Based">Curriculum-Based Assessment</option>
+                    <option value="Benchmark">District Benchmark</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
-              )}
+                
+                {wizardData.benchmarkAssessmentType === 'Other' && (
+                  <div>
+                    <label htmlFor="benchmarkAssessmentOtherName" className="block text-sm font-medium mb-1 text-text-primary">
+                      Specify Other Assessment Name:
+                    </label>
+                    <input
+                      type="text"
+                      id="benchmarkAssessmentOtherName"
+                      value={wizardData.benchmarkAssessmentOtherName}
+                      onChange={(e) => setWizardData({ ...wizardData, benchmarkAssessmentOtherName: e.target.value })}
+                      className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                      placeholder="Enter assessment name"
+                    />
+                  </div>
+                )}
 
-              {/* NWEA Specific Fields */}
-              {wizardData.benchmarkAssessmentType === 'NWEA' && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Reading Section */}
-                    <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                      <h4 className="font-medium mb-3 text-text-primary">Reading</h4>
-                      <div className="space-y-3">
-                        <div>
-                          <label htmlFor="nweaReadingRit" className="block text-xs font-medium mb-1 text-text-primary">
-                            RIT Score:
-                          </label>
-                          <input
-                            type="number"
-                            id="nweaReadingRit"
-                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                            placeholder="e.g., 185"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="nweaReadingPercentile" className="block text-xs font-medium mb-1 text-text-primary">
-                            Percentile (compared to peers):
-                          </label>
-                          <input
-                            type="number"
-                            id="nweaReadingPercentile"
-                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                            placeholder="e.g., 45"
-                            min="1"
-                            max="99"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="nweaReadingGrowth" className="block text-xs font-medium mb-1 text-text-primary">
-                            Growth Percentile:
-                          </label>
-                          <input
-                            type="number"
-                            id="nweaReadingGrowth"
-                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                            placeholder="e.g., 60"
-                            min="1"
-                            max="99"
-                          />
-                        </div>
-                      </div>
+                {wizardData.benchmarkAssessmentType === 'NWEA' && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label htmlFor="nweaRitScore" className="block text-sm font-medium mb-1 text-text-primary">
+                        RIT Score:
+                      </label>
+                      <input
+                        type="text"
+                        id="nweaRitScore"
+                        value={wizardData.nweaRitScore}
+                        onChange={(e) => setWizardData({ ...wizardData, nweaRitScore: e.target.value })}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        placeholder="e.g., 185"
+                      />
                     </div>
-
-                    {/* Math Section */}
-                    <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                      <h4 className="font-medium mb-3 text-text-primary">Math</h4>
-                      <div className="space-y-3">
-                        <div>
-                          <label htmlFor="nweaMathRit" className="block text-xs font-medium mb-1 text-text-primary">
-                            RIT Score:
-                          </label>
-                          <input
-                            type="number"
-                            id="nweaMathRit"
-                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                            placeholder="e.g., 190"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="nweaMathPercentile" className="block text-xs font-medium mb-1 text-text-primary">
-                            Percentile (compared to peers):
-                          </label>
-                          <input
-                            type="number"
-                            id="nweaMathPercentile"
-                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                            placeholder="e.g., 35"
-                            min="1"
-                            max="99"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="nweaMathGrowth" className="block text-xs font-medium mb-1 text-text-primary">
-                            Growth Percentile:
-                          </label>
-                          <input
-                            type="number"
-                            id="nweaMathGrowth"
-                            className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                            placeholder="e.g., 55"
-                            min="1"
-                            max="99"
-                          />
-                        </div>
-                      </div>
+                    <div>
+                      <label htmlFor="nweaPercentilePeers" className="block text-sm font-medium mb-1 text-text-primary">
+                        Percentile (Peers):
+                      </label>
+                      <input
+                        type="text"
+                        id="nweaPercentilePeers"
+                        value={wizardData.nweaPercentilePeers}
+                        onChange={(e) => setWizardData({ ...wizardData, nweaPercentilePeers: e.target.value })}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        placeholder="e.g., 25th"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="nweaGrowthPercentile" className="block text-sm font-medium mb-1 text-text-primary">
+                        Growth Percentile:
+                      </label>
+                      <input
+                        type="text"
+                        id="nweaGrowthPercentile"
+                        value={wizardData.nweaGrowthPercentile}
+                        onChange={(e) => setWizardData({ ...wizardData, nweaGrowthPercentile: e.target.value })}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        placeholder="e.g., 45th"
+                      />
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* SANDI Specific Fields */}
-              {wizardData.benchmarkAssessmentType === 'Curriculum-Based' && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Reading */}
-                    <div className="p-3 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                      <h4 className="font-medium mb-2 text-text-primary text-sm">Reading</h4>
-                      <div className="space-y-2">
-                        <input
-                          type="text"
-                          className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                          placeholder="Score"
-                        />
-                        <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm">
-                          <option value="">Level</option>
-                          <option value="1">Level 1</option>
-                          <option value="2">Level 2</option>
-                          <option value="3">Level 3</option>
-                          <option value="4">Level 4</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Writing */}
-                    <div className="p-3 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                      <h4 className="font-medium mb-2 text-text-primary text-sm">Writing</h4>
-                      <div className="space-y-2">
-                        <input
-                          type="text"
-                          className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                          placeholder="Score"
-                        />
-                        <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm">
-                          <option value="">Level</option>
-                          <option value="1">Level 1</option>
-                          <option value="2">Level 2</option>
-                          <option value="3">Level 3</option>
-                          <option value="4">Level 4</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Math */}
-                    <div className="p-3 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                      <h4 className="font-medium mb-2 text-text-primary text-sm">Math</h4>
-                      <div className="space-y-2">
-                        <input
-                          type="text"
-                          className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                          placeholder="Score"
-                        />
-                        <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm">
-                          <option value="">Level</option>
-                          <option value="1">Level 1</option>
-                          <option value="2">Level 2</option>
-                          <option value="3">Level 3</option>
-                          <option value="4">Level 4</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Communication */}
-                    <div className="p-3 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                      <h4 className="font-medium mb-2 text-text-primary text-sm">Communication</h4>
-                      <div className="space-y-2">
-                        <input
-                          type="text"
-                          className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm"
-                          placeholder="Score"
-                        />
-                        <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors text-sm">
-                          <option value="">Level</option>
-                          <option value="1">Level 1</option>
-                          <option value="2">Level 2</option>
-                          <option value="3">Level 3</option>
-                          <option value="4">Level 4</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Manual Input for Other Assessment Types */}
-              {(wizardData.benchmarkAssessmentType === 'Benchmark' || wizardData.benchmarkAssessmentType === 'Other') && (
                 <div>
                   <label htmlFor="benchmarkDataManualInput" className="block text-sm font-medium mb-1 text-text-primary">
-                    Assessment Results:
+                    Additional Benchmark Data Details:
                   </label>
                   <textarea
                     id="benchmarkDataManualInput"
                     value={wizardData.benchmarkDataManualInput}
                     onChange={(e) => setWizardData({ ...wizardData, benchmarkDataManualInput: e.target.value })}
                     className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                    placeholder="Enter assessment results and scores..."
+                    placeholder="Enter any additional benchmark assessment data, scores, or observations..."
                   />
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Statewide Assessment Section */}
-            <div className="border-b border-border pb-6">
+            <div className="border border-border rounded-lg p-4">
               <h3 className="text-lg font-medium mb-4 text-text-primary">Statewide Assessment Data</h3>
-              
-              <div className="mb-4">
-                <label htmlFor="statewideAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
-                  Assessment Type:
-                </label>
-                <select
-                  id="statewideAssessmentType"
-                  value={wizardData.statewideAssessmentType}
-                  onChange={(e) => setWizardData({ ...wizardData, statewideAssessmentType: e.target.value as WizardData['statewideAssessmentType'] })}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                >
-                  <option value="">Select Assessment</option>
-                  <option value="SBAC">SBAC (Smarter Balanced)</option>
-                  <option value="CAA">CAA (California Alternate Assessment)</option>
-                </select>
-              </div>
-
-              {wizardData.statewideAssessmentType && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                    <h4 className="font-medium mb-3 text-text-primary">ELA/Reading</h4>
-                    <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
-                      <option value="">Select Level</option>
-                      <option value="1">Level 1 - Standard Not Met</option>
-                      <option value="2">Level 2 - Standard Nearly Met</option>
-                      <option value="3">Level 3 - Standard Met</option>
-                      <option value="4">Level 4 - Standard Exceeded</option>
-                    </select>
-                  </div>
-
-                  <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                    <h4 className="font-medium mb-3 text-text-primary">Mathematics</h4>
-                    <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
-                      <option value="">Select Level</option>
-                      <option value="1">Level 1 - Standard Not Met</option>
-                      <option value="2">Level 2 - Standard Nearly Met</option>
-                      <option value="3">Level 3 - Standard Met</option>
-                      <option value="4">Level 4 - Standard Exceeded</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* ELPAC Section */}
-            <div>
-              <h3 className="text-lg font-medium mb-4 text-text-primary">ELPAC (English Language Proficiency)</h3>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2 text-text-primary">
-                  Has the student taken ELPAC?
-                </label>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="hasElpac"
-                      value="yes"
-                      className="mr-2"
-                    />
-                    Yes
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="statewideAssessmentType" className="block text-sm font-medium mb-1 text-text-primary">
+                    Type of Statewide Assessment:
                   </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="hasElpac"
-                      value="no"
-                      className="mr-2"
-                    />
-                    No
+                  <select
+                    id="statewideAssessmentType"
+                    value={wizardData.statewideAssessmentType}
+                    onChange={(e) => setWizardData({ ...wizardData, statewideAssessmentType: e.target.value as WizardData['statewideAssessmentType'] })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                  >
+                    <option value="">Select Assessment Type</option>
+                    <option value="SBAC">SBAC (Smarter Balanced)</option>
+                    <option value="CAA">CAA (California Alternate Assessment)</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="statewideAssessmentScores" className="block text-sm font-medium mb-1 text-text-primary">
+                    Statewide Assessment Scores:
                   </label>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                  <h4 className="font-medium mb-3 text-text-primary">Overall Score</h4>
-                  <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
-                    <option value="">Select Level</option>
-                    <option value="1">Level 1 - Minimally Developed</option>
-                    <option value="2">Level 2 - Somewhat Developed</option>
-                    <option value="3">Level 3 - Moderately Developed</option>
-                    <option value="4">Level 4 - Well Developed</option>
-                  </select>
-                </div>
-
-                <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                  <h4 className="font-medium mb-3 text-text-primary">Oral Language</h4>
-                  <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
-                    <option value="">Select Level</option>
-                    <option value="1">Level 1 - Minimally Developed</option>
-                    <option value="2">Level 2 - Somewhat Developed</option>
-                    <option value="3">Level 3 - Moderately Developed</option>
-                    <option value="4">Level 4 - Well Developed</option>
-                  </select>
-                </div>
-
-                <div className="p-4 border border-border rounded-lg bg-bg-secondary bg-opacity-30">
-                  <h4 className="font-medium mb-3 text-text-primary">Written Language</h4>
-                  <select className="w-full p-2 border border-border rounded bg-bg-primary focus:outline-none focus:ring-2 focus:ring-green transition-colors">
-                    <option value="">Select Level</option>
-                    <option value="1">Level 1 - Minimally Developed</option>
-                    <option value="2">Level 2 - Somewhat Developed</option>
-                    <option value="3">Level 3 - Moderately Developed</option>
-                    <option value="4">Level 4 - Well Developed</option>
-                  </select>
+                  <textarea
+                    id="statewideAssessmentScores"
+                    value={wizardData.statewideAssessmentScores}
+                    onChange={(e) => setWizardData({ ...wizardData, statewideAssessmentScores: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                    placeholder="Enter statewide assessment scores and performance levels..."
+                  />
                 </div>
               </div>
             </div>
+
+            {/* ELPAC Section (conditional) */}
+            {wizardData.englishLearnerStatus === 'ELL' && (
+              <div className="border border-border rounded-lg p-4">
+                <h3 className="text-lg font-medium mb-4 text-text-primary">ELPAC Scores (English Learner)</h3>
+                <div>
+                  <label htmlFor="elpacScores" className="block text-sm font-medium mb-1 text-text-primary">
+                    ELPAC Assessment Results:
+                  </label>
+                  <textarea
+                    id="elpacScores"
+                    value={wizardData.elpacScores}
+                    onChange={(e) => setWizardData({ ...wizardData, elpacScores: e.target.value })}
+                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                    placeholder="Enter ELPAC scores for listening, speaking, reading, and writing..."
+                  />
+                </div>
+              </div>
+            )}
           </div>
         );
-      case 4: // Step 5: New Baseline Data & Analysis
+      case 4: // Step 5: New Baseline Data Analysis
         return (
-          <div className="space-y-8">
-            {/* Baseline Assessments Section */}
-            <div className="border-b border-border pb-6">
-              <h3 className="text-lg font-medium mb-4 text-text-primary">Baseline Assessments</h3>
-              
-              {/* AI Recommendation Box */}
-              <div className="mb-6 p-4 bg-green bg-opacity-10 border border-green rounded-lg">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-green rounded-full text-white flex-shrink-0">
-                    <Brain size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-green mb-2">AI Assessment Recommendation</h4>
-                    <p className="text-sm text-text-secondary mb-3">
-                      Based on the previous goal information and student context, we recommend assessing the following domain areas:
-                    </p>
-                    <div className="bg-bg-primary p-3 rounded border border-border">
-                      <p className="text-sm font-medium text-text-primary">
-                        Recommended Domain: <span className="text-green">Operations & Algebraic Thinking</span>
-                      </p>
-                      <p className="text-sm text-text-secondary mt-1">
-                        Suggested Assessment Level: 2nd Grade Standards (K.OA.A.2 - Addition/Subtraction within 10)
-                      </p>
-                      <p className="text-xs text-text-secondary mt-2">
-                        This recommendation is based on the student's previous goal progress and identified areas of need.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Domain and Standard Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label htmlFor="newBaselineDomain" className="block text-sm font-medium mb-1 text-text-primary">
-                    Assessment Domain Area:
-                  </label>
-                  <select
-                    id="newBaselineDomain"
-                    value={wizardData.newBaselineDomain}
-                    onChange={(e) => setWizardData({ ...wizardData, newBaselineDomain: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                  >
-                    <option value="">Select Domain</option>
-                    <option value="Counting & Cardinality">Counting & Cardinality</option>
-                    <option value="Operations & Algebraic Thinking">Operations & Algebraic Thinking</option>
-                    <option value="Number & Operations in Base Ten">Number & Operations in Base Ten</option>
-                    <option value="Measurement & Data">Measurement & Data</option>
-                    <option value="Geometry">Geometry</option>
-                    <option value="Reading Foundational Skills">Reading Foundational Skills</option>
-                    <option value="Reading Literature">Reading Literature</option>
-                    <option value="Reading Informational Text">Reading Informational Text</option>
-                    <option value="Writing">Writing</option>
-                    <option value="Speaking & Listening">Speaking & Listening</option>
-                    <option value="Language">Language</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="newBaselineStandardId" className="block text-sm font-medium mb-1 text-text-primary">
-                    CCSS Standard Alignment:
-                  </label>
-                  <select
-                    id="newBaselineStandardId"
-                    value={wizardData.newBaselineStandardId}
-                    onChange={(e) => setWizardData({ ...wizardData, newBaselineStandardId: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-                    disabled={!wizardData.newBaselineDomain}
-                  >
-                    <option value="">Select Standard</option>
-                    {wizardData.newBaselineDomain === 'Operations & Algebraic Thinking' && (
-                      <>
-                        <option value="K.OA.A.2">K.OA.A.2 - Addition/Subtraction within 10</option>
-                        <option value="1.OA.A.1">1.OA.A.1 - Addition/Subtraction within 20</option>
-                        <option value="2.OA.A.1">2.OA.A.1 - Addition/Subtraction within 100</option>
-                      </>
-                    )}
-                    {wizardData.newBaselineDomain === 'Counting & Cardinality' && (
-                      <>
-                        <option value="K.CC.A.1">K.CC.A.1 - Count to 100</option>
-                        <option value="K.CC.B.4">K.CC.B.4 - Number relationships</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Data Analysis Section */}
+          <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium mb-4 text-text-primary">Data Analysis</h3>
-              
-              {/* Upload Assessment Placeholder */}
-              <div className="mb-6 p-6 border-2 border-dashed border-border rounded-lg text-center bg-bg-secondary bg-opacity-30">
-                <div className="flex flex-col items-center">
-                  <div className="p-3 bg-green bg-opacity-10 rounded-full mb-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7,10 12,15 17,10"/>
-                      <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                  </div>
-                  <h4 className="font-medium text-text-primary mb-1">Upload Assessment Results</h4>
-                  <p className="text-sm text-text-secondary mb-3">
-                    Drag and drop your assessment files here, or click to browse
-                  </p>
-                  <button className="btn bg-green text-white text-sm px-4 py-2">
-                    Choose Files
-                  </button>
-                  <p className="text-xs text-text-secondary mt-2">
-                    Supported formats: PDF, DOC, DOCX, JPG, PNG
-                  </p>
-                </div>
-              </div>
-
-              {/* Manual Input Options */}
-              <div className="space-y-6">
-                {/* Assessment Area Selection */}
-                <div>
-                  <label className="block text-sm font-medium mb-3 text-text-primary">
-                    Assessment Area:
-                  </label>
-                  <div className="flex gap-6">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="assessmentArea"
-                        value="math"
-                        className="mr-2 text-green focus:ring-green"
-                      />
-                      Math
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="assessmentArea"
-                        value="reading"
-                        className="mr-2 text-green focus:ring-green"
-                      />
-                      Reading
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="assessmentArea"
-                        value="writing"
-                        className="mr-2 text-green focus:ring-green"
-                      />
-                      Writing
-                    </label>
-                  </div>
-                </div>
-
-                {/* Results Input */}
-                <div>
-                  <label htmlFor="newBaselineResultsQuantitative" className="block text-sm font-medium mb-1 text-text-primary">
-                    Quantitative Results:
-                  </label>
-                  <textarea
-                    id="newBaselineResultsQuantitative"
-                    value={wizardData.newBaselineResultsQuantitative}
-                    onChange={(e) => setWizardData({ ...wizardData, newBaselineResultsQuantitative: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                    placeholder="e.g., 4 out of 5 word problems of addition and subtraction correct, 80% accuracy on number identification 1-10"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="newBaselineAdditionalInfoQualitative" className="block text-sm font-medium mb-1 text-text-primary">
-                    Additional Information and Observational Data:
-                  </label>
-                  <textarea
-                    id="newBaselineAdditionalInfoQualitative"
-                    value={wizardData.newBaselineAdditionalInfoQualitative}
-                    onChange={(e) => setWizardData({ ...wizardData, newBaselineAdditionalInfoQualitative: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                    placeholder="Describe student behavior during assessment, strategies used, areas of difficulty, strengths observed..."
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="newBaselineSupportsToIncreaseAccess" className="block text-sm font-medium mb-1 text-text-primary">
-                    Accommodations Provided During Assessment:
-                  </label>
-                  <textarea
-                    id="newBaselineSupportsToIncreaseAccess"
-                    value={wizardData.newBaselineSupportsToIncreaseAccess}
-                    onChange={(e) => setWizardData({ ...wizardData, newBaselineSupportsToIncreaseAccess: e.target.value })}
-                    className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                    placeholder="List any accommodations provided during the assessment (e.g., extended time, visual aids, manipulatives, etc.)"
-                  />
-                </div>
-              </div>
+              <label htmlFor="newBaselineDomain" className="block text-sm font-medium mb-1 text-text-primary">
+                Domain Area for New Baseline Assessment:
+              </label>
+              <select
+                id="newBaselineDomain"
+                value={wizardData.newBaselineDomain}
+                onChange={(e) => setWizardData({ ...wizardData, newBaselineDomain: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+              >
+                <option value="">Select Domain Area</option>
+                <option value="Reading">Reading</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Writing">Writing</option>
+                <option value="Communication">Communication</option>
+                <option value="Social/Behavioral">Social/Behavioral</option>
+                <option value="Adaptive/Life Skills">Adaptive/Life Skills</option>
+                <option value="Motor Skills">Motor Skills</option>
+              </select>
+            </div>
+            
+            <div>
+              <label htmlFor="newBaselineStandardId" className="block text-sm font-medium mb-1 text-text-primary">
+                Standard/Skill Alignment for New Goal:
+              </label>
+              <input
+                type="text"
+                id="newBaselineStandardId"
+                value={wizardData.newBaselineStandardId}
+                onChange={(e) => setWizardData({ ...wizardData, newBaselineStandardId: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                placeholder="e.g., 2.NBT.A.2, or describe the specific skill"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="newBaselineResultsQuantitative" className="block text-sm font-medium mb-1 text-text-primary">
+                New Baseline Assessment Results (Quantitative):
+              </label>
+              <textarea
+                id="newBaselineResultsQuantitative"
+                value={wizardData.newBaselineResultsQuantitative}
+                onChange={(e) => setWizardData({ ...wizardData, newBaselineResultsQuantitative: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Enter specific, measurable baseline data (e.g., 'Correctly identifies 15 out of 26 uppercase letters', 'Solves 3 out of 10 single-digit addition problems')..."
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="newBaselineAdditionalInfoQualitative" className="block text-sm font-medium mb-1 text-text-primary">
+                Additional Baseline Information (Qualitative):
+              </label>
+              <textarea
+                id="newBaselineAdditionalInfoQualitative"
+                value={wizardData.newBaselineAdditionalInfoQualitative}
+                onChange={(e) => setWizardData({ ...wizardData, newBaselineAdditionalInfoQualitative: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Describe how the student approached the task, strategies used, areas of difficulty, etc..."
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="newBaselineSupportsToIncreaseAccess" className="block text-sm font-medium mb-1 text-text-primary">
+                Supports Needed to Increase Access:
+              </label>
+              <textarea
+                id="newBaselineSupportsToIncreaseAccess"
+                value={wizardData.newBaselineSupportsToIncreaseAccess}
+                onChange={(e) => setWizardData({ ...wizardData, newBaselineSupportsToIncreaseAccess: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                placeholder="What accommodations, modifications, or supports would help the student access this skill or content area?"
+              />
             </div>
           </div>
         );
@@ -1235,7 +938,7 @@ const GoalWriting: React.FC = () => {
           <div className="space-y-8">
             {/* Accommodations Section */}
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-text-primary">Accommodations</h3>
+              <h3 className="text-lg font-medium mb-2 text-text-primary">Accommodations</h3>
               <p className="text-sm text-text-secondary mb-4">
                 Accommodations help students access the same curriculum and meet the same learning goals and expectations as their peers. They change <em>how</em> a student learns, not <em>what</em> they learn.
               </p>
@@ -1257,7 +960,7 @@ const GoalWriting: React.FC = () => {
                   'Small Group Testing',
                   'Reduced Distractions Environment'
                 ].map((accommodation) => (
-                  <label key={accommodation} className="flex items-center gap-2 p-2 hover:bg-bg-secondary rounded transition-colors cursor-pointer">
+                  <label key={accommodation} className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={wizardData.accommodations.includes(accommodation)}
@@ -1274,7 +977,7 @@ const GoalWriting: React.FC = () => {
                           });
                         }
                       }}
-                      className="text-green focus:ring-green"
+                      className="rounded border-border focus:ring-2 focus:ring-green"
                     />
                     <span className="text-sm">{accommodation}</span>
                   </label>
@@ -1296,8 +999,8 @@ const GoalWriting: React.FC = () => {
             </div>
 
             {/* Modifications Section */}
-            <div className="border-t border-border pt-6">
-              <h3 className="text-lg font-semibold mb-3 text-text-primary">Modifications</h3>
+            <div className="border-t border-border pt-8">
+              <h3 className="text-lg font-medium mb-2 text-text-primary">Modifications</h3>
               <p className="text-sm text-text-secondary mb-4">
                 Modifications adjust the learning goals or expectations to match the student's individual needs and abilities. They change <em>what</em> a student is expected to learn or demonstrate.
               </p>
@@ -1313,7 +1016,7 @@ const GoalWriting: React.FC = () => {
                   'Simplified Content/Text',
                   'Use of Alternate Materials'
                 ].map((modification) => (
-                  <label key={modification} className="flex items-center gap-2 p-2 hover:bg-bg-secondary rounded transition-colors cursor-pointer">
+                  <label key={modification} className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={wizardData.modifications.includes(modification)}
@@ -1330,7 +1033,7 @@ const GoalWriting: React.FC = () => {
                           });
                         }
                       }}
-                      className="text-green focus:ring-green"
+                      className="rounded border-border focus:ring-2 focus:ring-green"
                     />
                     <span className="text-sm">{modification}</span>
                   </label>
@@ -1351,10 +1054,10 @@ const GoalWriting: React.FC = () => {
               </div>
             </div>
 
-            {/* Behavioral Supports Section - Conditional */}
+            {/* Behavioral Supports Section (conditional) */}
             {wizardData.behaviorNeeds === 'yes' && (
-              <div className="border-t border-border pt-6">
-                <h3 className="text-lg font-semibold mb-3 text-text-primary">Behavioral Supports</h3>
+              <div className="border-t border-border pt-8">
+                <h3 className="text-lg font-medium mb-2 text-text-primary">Behavioral Supports</h3>
                 
                 <h4 className="text-md font-medium mb-3 text-text-primary">Select Common Behavioral Supports:</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -1368,7 +1071,7 @@ const GoalWriting: React.FC = () => {
                     'Clear & Consistent Expectations',
                     'Social Stories/Scripts'
                   ].map((support) => (
-                    <label key={support} className="flex items-center gap-2 p-2 hover:bg-bg-secondary rounded transition-colors cursor-pointer">
+                    <label key={support} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={wizardData.behaviorSupports.includes(support)}
@@ -1385,7 +1088,7 @@ const GoalWriting: React.FC = () => {
                             });
                           }
                         }}
-                        className="text-green focus:ring-green"
+                        className="rounded border-border focus:ring-2 focus:ring-green"
                       />
                       <span className="text-sm">{support}</span>
                     </label>
@@ -1407,10 +1110,10 @@ const GoalWriting: React.FC = () => {
               </div>
             )}
 
-            {/* English Learner Supports Section - Conditional */}
+            {/* English Learner Supports Section (conditional) */}
             {wizardData.englishLearnerStatus === 'ELL' && (
-              <div className="border-t border-border pt-6">
-                <h3 className="text-lg font-semibold mb-3 text-text-primary">English Learner (EL) Supports</h3>
+              <div className="border-t border-border pt-8">
+                <h3 className="text-lg font-medium mb-2 text-text-primary">English Learner (EL) Supports</h3>
                 
                 <h4 className="text-md font-medium mb-3 text-text-primary">Select Common EL Supports:</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -1423,7 +1126,7 @@ const GoalWriting: React.FC = () => {
                     'Graphic Organizers specifically for ELs',
                     'Peer Tutoring/Partner Work'
                   ].map((support) => (
-                    <label key={support} className="flex items-center gap-2 p-2 hover:bg-bg-secondary rounded transition-colors cursor-pointer">
+                    <label key={support} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={wizardData.elSelectedSupports.includes(support)}
@@ -1440,7 +1143,7 @@ const GoalWriting: React.FC = () => {
                             });
                           }
                         }}
-                        className="text-green focus:ring-green"
+                        className="rounded border-border focus:ring-2 focus:ring-green"
                       />
                       <span className="text-sm">{support}</span>
                     </label>
@@ -1456,7 +1159,7 @@ const GoalWriting: React.FC = () => {
                     value={wizardData.elSupports}
                     onChange={(e) => setWizardData({ ...wizardData, elSupports: e.target.value })}
                     className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
-                    placeholder="Describe any additional EL supports or provide details about selected supports..."
+                    placeholder="Describe any additional EL supports or provide more details about selected supports..."
                   />
                 </div>
               </div>
@@ -1663,7 +1366,7 @@ const GoalWriting: React.FC = () => {
               </p>
               <ul className="list-disc list-inside space-y-2 text-sm text-text-secondary">
                 <li>Anecdotal student information: Include interests, how they participate in school, learning preferences, and general relevant background.</li>
-                <li>Strengths: Describe what the student <em>can</em> do. Include both qualitative observations (e.g., 'shows enthusiasm for reading') and quantitative data (e.g., 'can identify 20/26 uppercase letters').</li>
+                <li>Strengths: Describe what the student *can* do. Include both qualitative observations (e.g., 'shows enthusiasm for reading') and quantitative data (e.g., 'can identify 20/26 uppercase letters').</li>
                 <li>Areas of Growth/Needs: Describe skills the student is still developing or finds challenging. Include both qualitative observations (e.g., 'struggles to organize thoughts for writing') and quantitative data (e.g., 'solves 2 out of 10 single-step math word problems').</li>
                 <li>Baseline Data: Clearly state the student's current performance level on the specific skill(s) targeted for new goals. This should be measurable (e.g., 'When given a 3rd-grade passage, reads 45 words correct per minute with 5 errors'). This baseline directly informs goal development.</li>
                 <li>Impact of Disability: Briefly explain how the student's disability affects their involvement and progress in the general education curriculum.</li>
@@ -1671,73 +1374,214 @@ const GoalWriting: React.FC = () => {
             </div>
           </div>
         );
-      // Placeholder cases for the remaining steps
-    case 8: // Step 9: Propose IEP Goals & Objectives - Now includes SMART tips
+      case 8: return <div>Content for Step 9: Propose IEP Goals & Objectives (Coming Soon)</div>;
+      case 9: // Step 10: Related Services
         return (
-          <div className="space-y-8">
-            {/* SMART Goal Writing Tips Section */}
-            <div className="card bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm">
-              <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
-                <Lightbulb className="text-green" size={20} sm:size={22} />
-                <h2 className="text-xl sm:text-2xl font-medium">SMART Goal Writing Tips</h2>
+          <div className="space-y-6">
+            {/* Header and Add Service Button */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-medium text-text-primary">Related Services</h3>
+                <p className="text-sm text-text-secondary mt-1">
+                  Document the related services this student will receive to support their IEP goals.
+                </p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
-                {[
-                  { letter: 'S', term: 'Specific', desc: 'Clearly define what needs to be accomplished. Avoid vague language and be precise about the expected behavior or skill.' },
-                  { letter: 'M', term: 'Measurable', desc: 'How will you track progress and know when the goal is met? Include specific criteria like percentages or frequency.' },
-                  { letter: 'A', term: 'Achievable', desc: 'Is the goal realistic given the student\'s current abilities and expected growth? Set challenging but attainable targets.' },
-                  { letter: 'R', term: 'Relevant', desc: 'Does the goal address the student\'s key needs and align with curriculum expectations and life skills?' },
-                  { letter: 'T', term: 'Time-bound', desc: 'What is the target date for achieving this goal? Establish clear timelines for assessment and review.' },
-                ].map(tip => (
-                  <div key={tip.letter} className="bg-bg-primary rounded-lg p-4 sm:p-5 border border-border hover:border-green/50 transition-all duration-200 shadow-sm hover:shadow-md">
-                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0">
-                        {tip.letter}
-                      </div>
-                      <h3 className="font-semibold text-green text-sm sm:text-base">{tip.term}</h3>
+              <button
+                onClick={addNewService}
+                className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-lg hover:bg-opacity-90 transition-colors"
+              >
+                <Plus size={16} />
+                Add New Service
+              </button>
+            </div>
+
+            {/* Service Entries */}
+            {wizardData.relatedServices.length === 0 ? (
+              <div className="text-center py-8 text-text-secondary border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                <Handshake size={40} className="mx-auto mb-2 opacity-30" />
+                <p>No related services added yet</p>
+                <p className="text-xs mt-1">Click "Add New Service" to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {wizardData.relatedServices.map((service, index) => (
+                  <div key={service.id} className="space-y-6 border border-border p-4 rounded-lg mb-4">
+                    {/* Service Header with Remove Button */}
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium text-text-primary">Service #{index + 1}</h4>
+                      <button
+                        onClick={() => removeService(service.id)}
+                        className="flex items-center gap-1 px-3 py-1 text-red-600 hover:bg-red-50 rounded-md transition-colors text-sm"
+                      >
+                        <Trash2 size={14} />
+                        Remove Service
+                      </button>
                     </div>
-                    <p className="text-text-secondary text-xs sm:text-sm leading-normal">{tip.desc}</p>
+
+                    {/* Type of Service */}
+                    <div>
+                      <label htmlFor={`serviceType-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                        Type of Service:
+                      </label>
+                      <select
+                        id={`serviceType-${service.id}`}
+                        value={service.serviceType}
+                        onChange={(e) => updateService(service.id, 'serviceType', e.target.value)}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                      >
+                        <option value="">-- Select Service --</option>
+                        <option value="Specialized Academic Instruction (SAI)">Specialized Academic Instruction (SAI)</option>
+                        <option value="Behavior Intervention Services (BIS)">Behavior Intervention Services (BIS)</option>
+                        <option value="Speech and Language">Speech and Language</option>
+                        <option value="Occupational Therapy (OT)">Occupational Therapy (OT)</option>
+                        <option value="Adapted Physical Education (APE)">Adapted Physical Education (APE)</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    {/* Other Service Name (conditional) */}
+                    {service.serviceType === 'Other' && (
+                      <div>
+                        <label htmlFor={`serviceOtherName-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Specify Other Service Name:
+                        </label>
+                        <input
+                          type="text"
+                          id={`serviceOtherName-${service.id}`}
+                          value={service.serviceOtherName}
+                          onChange={(e) => updateService(service.id, 'serviceOtherName', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                          placeholder="Enter the name of the service"
+                        />
+                      </div>
+                    )}
+
+                    {/* Duration and Frequency */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor={`duration-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Duration (e.g., minutes per session):
+                        </label>
+                        <input
+                          type="text"
+                          id={`duration-${service.id}`}
+                          value={service.duration}
+                          onChange={(e) => updateService(service.id, 'duration', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                          placeholder="e.g., 30 minutes"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`frequency-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Frequency:
+                        </label>
+                        <select
+                          id={`frequency-${service.id}`}
+                          value={service.frequency}
+                          onChange={(e) => updateService(service.id, 'frequency', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        >
+                          <option value="">-- Select Frequency --</option>
+                          <option value="Daily">Daily</option>
+                          <option value="Weekly">Weekly</option>
+                          <option value="Monthly">Monthly</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Delivery Method */}
+                    <div>
+                      <label className="block text-sm font-medium mb-3 text-text-primary">
+                        Delivery Method:
+                      </label>
+                      <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`delivery-${service.id}`}
+                            value="Individual"
+                            checked={service.delivery === 'Individual'}
+                            onChange={(e) => updateService(service.id, 'delivery', e.target.value)}
+                            className="text-green focus:ring-green"
+                          />
+                          <span>Individual</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`delivery-${service.id}`}
+                            value="Group"
+                            checked={service.delivery === 'Group'}
+                            onChange={(e) => updateService(service.id, 'delivery', e.target.value)}
+                            className="text-green focus:ring-green"
+                          />
+                          <span>Group</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Location */}
+                    <div>
+                      <label htmlFor={`location-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                        Location of Service:
+                      </label>
+                      <input
+                        type="text"
+                        id={`location-${service.id}`}
+                        value={service.location}
+                        onChange={(e) => updateService(service.id, 'location', e.target.value)}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        placeholder="e.g., General Ed Classroom, Resource Room"
+                      />
+                    </div>
+
+                    {/* Comments */}
+                    <div>
+                      <label htmlFor={`comments-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                        Comments (optional):
+                      </label>
+                      <textarea
+                        id={`comments-${service.id}`}
+                        value={service.comments}
+                        onChange={(e) => updateService(service.id, 'comments', e.target.value)}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                        placeholder="Any additional notes or details about the service..."
+                      />
+                    </div>
+
+                    {/* Start and End Dates */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor={`startDate-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Service Start Date:
+                        </label>
+                        <input
+                          type="date"
+                          id={`startDate-${service.id}`}
+                          value={service.startDate}
+                          onChange={(e) => updateService(service.id, 'startDate', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`endDate-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Service End Date:
+                        </label>
+                        <input
+                          type="date"
+                          id={`endDate-${service.id}`}
+                          value={service.endDate}
+                          onChange={(e) => updateService(service.id, 'endDate', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-bg-secondary rounded-lg border border-border">
-                <h3 className="font-semibold text-green mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                  Additional Best Practices
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-                  {[
-                    "Use positive language focusing on what the student will do",
-                    "Include conditions under which the skill will be performed",
-                    "Consider the student's learning style and preferences",
-                    "Align goals with state standards when appropriate",
-                    "Ensure goals are functional and meaningful to the student",
-                    "Plan for regular progress monitoring and data collection"
-                  ].map(practice => (
-                     <p key={practice} className="flex items-start gap-2 text-xs sm:text-sm text-text-secondary">
-                        <span className="w-1.5 h-1.5 bg-green rounded-full mt-[0.3em] sm:mt-[0.4em] flex-shrink-0"></span>
-                        <span>{practice}</span>
-                     </p>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Goal Proposal Content */}
-            <div>
-              <h3 className="text-lg font-medium mb-4 text-text-primary">AI-Generated Goal Proposal</h3>
-              <p className="text-text-secondary mb-4">
-                Based on all the information provided, here are the recommended IEP goals and objectives:
-              </p>
-              <div className="bg-bg-secondary bg-opacity-30 p-4 rounded-lg">
-                <p className="text-sm text-text-secondary">
-                  Goal proposals will be generated based on the comprehensive data collected in previous steps...
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         );
-      case 9: return <div>Content for Step 10: Related Services (Coming Soon)</div>;
       default:
         return <div>Invalid step or step not yet implemented.</div>;
     }
@@ -1844,34 +1688,61 @@ const GoalWriting: React.FC = () => {
           <p className="text-text-secondary text-sm sm:text-lg mb-6 sm:mb-8 max-w-xl sm:max-w-2xl mx-auto leading-relaxed">
             Use our AI-powered assistant to guide you through creating comprehensive, measurable Present Levels, Baselines, and IEP Goals for your students.
           </p>
-          
-          {/* Student Selection Dropdown */}
-          <div className="mb-6 sm:mb-8">
-            <label htmlFor="studentSelect" className="block text-sm font-medium mb-2 text-text-secondary">
-              Select a student to get started:
-            </label>
-            <select
-              id="studentSelect"
-              value={selectedStudentId}
-              onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="mx-auto block w-full max-w-md p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
-            >
-              <option value="">Choose a student...</option>
-              {mockStudents.map(student => (
-                <option key={student.id} value={student.id}>{student.name}</option>
-              ))}
-            </select>
-          </div>
-          
           <button
             onClick={handleStartWizard}
-            disabled={!selectedStudentId}
-            className="inline-flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-3.5 bg-green text-white rounded-lg sm:rounded-xl font-medium text-base sm:text-lg hover:bg-opacity-90 transition-all duration-200 shadow-lg hover:shadow-green/30 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="inline-flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-3.5 bg-green text-white rounded-lg sm:rounded-xl font-medium text-base sm:text-lg hover:bg-opacity-90 transition-all duration-200 shadow-lg hover:shadow-green/30 transform hover:scale-105"
           >
             <Brain size={20} sm:size={24} />
-            Let's Start Building
+            Create New Student IEP Goals
             <ArrowRight size={20} sm:size={24} />
           </button>
+        </div>
+      </div>
+
+      <div className="card bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
+          <Lightbulb className="text-green" size={20} sm:size={22} />
+          <h2 className="text-xl sm:text-2xl font-medium">SMART Goal Writing Tips</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+          {[
+            { letter: 'S', term: 'Specific', desc: 'Clearly define what needs to be accomplished. Avoid vague language and be precise about the expected behavior or skill.' },
+            { letter: 'M', term: 'Measurable', desc: 'How will you track progress and know when the goal is met? Include specific criteria like percentages or frequency.' },
+            { letter: 'A', term: 'Achievable', desc: 'Is the goal realistic given the student\'s current abilities and expected growth? Set challenging but attainable targets.' },
+            { letter: 'R', term: 'Relevant', desc: 'Does the goal address the student\'s key needs and align with curriculum expectations and life skills?' },
+            { letter: 'T', term: 'Time-bound', desc: 'What is the target date for achieving this goal? Establish clear timelines for assessment and review.' },
+          ].map(tip => (
+            <div key={tip.letter} className="bg-bg-primary rounded-lg p-4 sm:p-5 border border-border hover:border-green/50 transition-all duration-200 shadow-sm hover:shadow-md">
+              <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0">
+                  {tip.letter}
+                </div>
+                <h3 className="font-semibold text-green text-sm sm:text-base">{tip.term}</h3>
+              </div>
+              <p className="text-text-secondary text-xs sm:text-sm leading-normal">{tip.desc}</p>
+            </div>
+          ))}
+        </div>
+         <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-bg-secondary rounded-lg border border-border">
+          <h3 className="font-semibold text-green mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            Additional Best Practices
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+            {[
+              "Use positive language focusing on what the student will do",
+              "Include conditions under which the skill will be performed",
+              "Consider the student's learning style and preferences",
+              "Align goals with state standards when appropriate",
+              "Ensure goals are functional and meaningful to the student",
+              "Plan for regular progress monitoring and data collection"
+            ].map(practice => (
+               <p key={practice} className="flex items-start gap-2 text-xs sm:text-sm text-text-secondary">
+                  <span className="w-1.5 h-1.5 bg-green rounded-full mt-[0.3em] sm:mt-[0.4em] flex-shrink-0"></span>
+                  <span>{practice}</span>
+               </p>
+            ))}
+          </div>
         </div>
       </div>
     </div>
