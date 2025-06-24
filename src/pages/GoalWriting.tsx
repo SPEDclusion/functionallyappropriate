@@ -1619,7 +1619,71 @@ const GoalWriting: React.FC = () => {
         );
 
       case 7: return <div>Content for Step 8: Draft Present Levels (Coming Soon)</div>;
-      case 8: return <div>Content for Step 9: Propose IEP Goals & Objectives (Coming Soon)</div>;
+   case 8: // Step 9: Propose IEP Goals & Objectives - Now includes SMART tips
+        return (
+          <div className="space-y-8">
+            {/* SMART Goal Writing Tips Section */}
+            <div className="card bg-gradient-to-br from-green/5 via-transparent to-green/5 border-green/20 hover:border-green/30 transition-all duration-300 shadow-sm">
+              <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
+                <Lightbulb className="text-green" size={20} sm:size={22} />
+                <h2 className="text-xl sm:text-2xl font-medium">SMART Goal Writing Tips</h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+                {[
+                  { letter: 'S', term: 'Specific', desc: 'Clearly define what needs to be accomplished. Avoid vague language and be precise about the expected behavior or skill.' },
+                  { letter: 'M', term: 'Measurable', desc: 'How will you track progress and know when the goal is met? Include specific criteria like percentages or frequency.' },
+                  { letter: 'A', term: 'Achievable', desc: 'Is the goal realistic given the student\'s current abilities and expected growth? Set challenging but attainable targets.' },
+                  { letter: 'R', term: 'Relevant', desc: 'Does the goal address the student\'s key needs and align with curriculum expectations and life skills?' },
+                  { letter: 'T', term: 'Time-bound', desc: 'What is the target date for achieving this goal? Establish clear timelines for assessment and review.' },
+                ].map(tip => (
+                  <div key={tip.letter} className="bg-bg-primary rounded-lg p-4 sm:p-5 border border-border hover:border-green/50 transition-all duration-200 shadow-sm hover:shadow-md">
+                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0">
+                        {tip.letter}
+                      </div>
+                      <h3 className="font-semibold text-green text-sm sm:text-base">{tip.term}</h3>
+                    </div>
+                    <p className="text-text-secondary text-xs sm:text-sm leading-normal">{tip.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-bg-secondary rounded-lg border border-border">
+                <h3 className="font-semibold text-green mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  Additional Best Practices
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                  {[
+                    "Use positive language focusing on what the student will do",
+                    "Include conditions under which the skill will be performed",
+                    "Consider the student's learning style and preferences",
+                    "Align goals with state standards when appropriate",
+                    "Ensure goals are functional and meaningful to the student",
+                    "Plan for regular progress monitoring and data collection"
+                  ].map(practice => (
+                     <p key={practice} className="flex items-start gap-2 text-xs sm:text-sm text-text-secondary">
+                        <span className="w-1.5 h-1.5 bg-green rounded-full mt-[0.3em] sm:mt-[0.4em] flex-shrink-0"></span>
+                        <span>{practice}</span>
+                     </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Goal Proposal Content */}
+            <div>
+              <h3 className="text-lg font-medium mb-4 text-text-primary">AI-Generated Goal Proposal</h3>
+              <p className="text-text-secondary mb-4">
+                Based on all the information provided, here are the recommended IEP goals and objectives:
+              </p>
+              <div className="bg-bg-secondary bg-opacity-30 p-4 rounded-lg">
+                <p className="text-sm text-text-secondary">
+                  Goal proposals will be generated based on the comprehensive data collected in previous steps...
+                </p>
+              </div>
+            </div>
+          </div>
+        );
       case 9: return <div>Content for Step 10: Related Services (Coming Soon)</div>;
       default:
         return <div>Invalid step or step not yet implemented.</div>;
