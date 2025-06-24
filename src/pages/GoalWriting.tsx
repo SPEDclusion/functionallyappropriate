@@ -1737,11 +1737,303 @@ const GoalWriting: React.FC = () => {
             </div>
           </div>
         );
-      case 9: return <div>Content for Step 10: Related Services (Coming Soon)</div>;
+      case 9: // Step 10: Related Services
+        return (
+          <div className="space-y-6">
+            {/* Header and Add Service Button */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-medium text-text-primary">Related Services</h3>
+                <p className="text-sm text-text-secondary mt-1">
+                  Document the related services this student will receive to support their IEP goals.
+                </p>
+              </div>
+              <button
+                onClick={addNewService}
+                className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-lg hover:bg-opacity-90 transition-colors"
+              >
+                <Plus size={16} />
+                Add New Service
+              </button>
+            </div>
+
+            {/* Service Entries */}
+            {wizardData.relatedServices.length === 0 ? (
+              <div className="text-center py-8 text-text-secondary border border-border rounded-lg bg-bg-secondary bg-opacity-30">
+                <Handshake size={40} className="mx-auto mb-2 opacity-30" />
+                <p>No related services added yet</p>
+                <p className="text-xs mt-1">Click "Add New Service" to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {wizardData.relatedServices.map((service, index) => (
+                  <div key={service.id} className="space-y-6 border border-border p-4 rounded-lg mb-4">
+                    {/* Service Header with Remove Button */}
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium text-text-primary">Service #{index + 1}</h4>
+                      <button
+                        onClick={() => removeService(service.id)}
+                        className="flex items-center gap-1 px-3 py-1 text-red-600 hover:bg-red-50 rounded-md transition-colors text-sm"
+                      >
+                        <Trash2 size={14} />
+                        Remove Service
+                      </button>
+                    </div>
+
+                    {/* Type of Service */}
+                    <div>
+                      <label htmlFor={`serviceType-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                        Type of Service:
+                      </label>
+                      <select
+                        id={`serviceType-${service.id}`}
+                        value={service.serviceType}
+                        onChange={(e) => updateService(service.id, 'serviceType', e.target.value)}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                      >
+                        <option value="">-- Select Service --</option>
+                        <option value="Specialized Academic Instruction (SAI)">Specialized Academic Instruction (SAI)</option>
+                        <option value="Behavior Intervention Services (BIS)">Behavior Intervention Services (BIS)</option>
+                        <option value="Speech and Language">Speech and Language</option>
+                        <option value="Occupational Therapy (OT)">Occupational Therapy (OT)</option>
+                        <option value="Adapted Physical Education (APE)">Adapted Physical Education (APE)</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    {/* Other Service Name (conditional) */}
+                    {service.serviceType === 'Other' && (
+                      <div>
+                        <label htmlFor={`serviceOtherName-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Specify Other Service Name:
+                        </label>
+                        <input
+                          type="text"
+                          id={`serviceOtherName-${service.id}`}
+                          value={service.serviceOtherName}
+                          onChange={(e) => updateService(service.id, 'serviceOtherName', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                          placeholder="Enter the name of the service"
+                        />
+                      </div>
+                    )}
+
+                    {/* Duration and Frequency */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor={`duration-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Duration (e.g., minutes per session):
+                        </label>
+                        <input
+                          type="text"
+                          id={`duration-${service.id}`}
+                          value={service.duration}
+                          onChange={(e) => updateService(service.id, 'duration', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                          placeholder="e.g., 30 minutes"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`frequency-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Frequency:
+                        </label>
+                        <select
+                          id={`frequency-${service.id}`}
+                          value={service.frequency}
+                          onChange={(e) => updateService(service.id, 'frequency', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        >
+                          <option value="">-- Select Frequency --</option>
+                          <option value="Daily">Daily</option>
+                          <option value="Weekly">Weekly</option>
+                          <option value="Monthly">Monthly</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Delivery Method */}
+                    <div>
+                      <label className="block text-sm font-medium mb-3 text-text-primary">
+                        Delivery Method:
+                      </label>
+                      <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`delivery-${service.id}`}
+                            value="Individual"
+                            checked={service.delivery === 'Individual'}
+                            onChange={(e) => updateService(service.id, 'delivery', e.target.value)}
+                            className="text-green focus:ring-green"
+                          />
+                          <span>Individual</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`delivery-${service.id}`}
+                            value="Group"
+                            checked={service.delivery === 'Group'}
+                            onChange={(e) => updateService(service.id, 'delivery', e.target.value)}
+                            className="text-green focus:ring-green"
+                          />
+                          <span>Group</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Location */}
+                    <div>
+                      <label htmlFor={`location-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                        Location of Service:
+                      </label>
+                      <input
+                        type="text"
+                        id={`location-${service.id}`}
+                        value={service.location}
+                        onChange={(e) => updateService(service.id, 'location', e.target.value)}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        placeholder="e.g., General Ed Classroom, Resource Room"
+                      />
+                    </div>
+
+                    {/* Comments */}
+                    <div>
+                      <label htmlFor={`comments-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                        Comments (optional):
+                      </label>
+                      <textarea
+                        id={`comments-${service.id}`}
+                        value={service.comments}
+                        onChange={(e) => updateService(service.id, 'comments', e.target.value)}
+                        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-24"
+                        placeholder="Any additional notes or details about the service..."
+                      />
+                    </div>
+
+                    {/* Start and End Dates */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor={`startDate-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Service Start Date:
+                        </label>
+                        <input
+                          type="date"
+                          id={`startDate-${service.id}`}
+                          value={service.startDate}
+                          onChange={(e) => updateService(service.id, 'startDate', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`endDate-${service.id}`} className="block text-sm font-medium mb-1 text-text-primary">
+                          Service End Date:
+                        </label>
+                        <input
+                          type="date"
+                          id={`endDate-${service.id}`}
+                          value={service.endDate}
+                          onChange={(e) => updateService(service.id, 'endDate', e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
       default:
         return <div>Invalid step or step not yet implemented.</div>;
     }
   };
+    }
+  };
+
+  // Main component return (non-wizard view) - This part was updated by a previous Bolt prompt
+  // based on your request to simplify the main page.
+  if (showWizard) {
+    // This is the existing wizard shell from your code, now driven by the new wizardSteps and currentStep
+    return (
+      <div className="animate-fade-in">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-3xl font-medium">AI-Assisted Goal Creation</h1> {/* This title can be updated if needed */}
+              <button
+                onClick={() => setShowWizard(false)}
+                className="p-2 hover:bg-bg-secondary rounded-lg transition-colors"
+                aria-label="Close Wizard"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex items-center space-x-2 sm:space-x-4 mb-6 overflow-x-auto pb-2">
+              {wizardSteps.map((step, index) => (
+                <div key={step.id} className="flex items-center flex-shrink-0">
+                  <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-all duration-300 ${
+                    index === currentStep ? 'bg-green text-white border-green scale-110' : 
+                    index < currentStep ? 'bg-green-200 text-green border-green-200' : 
+                    'border-border text-text-secondary'
+                  }`}>
+                    {index < currentStep ? <Check size={16} smSize={20} /> : <span className="text-xs sm:text-sm font-medium">{index + 1}</span>}
+                  </div>
+                  <div className="ml-2 sm:ml-3 text-left min-w-max">
+                     <p className={`text-xs sm:text-sm font-medium truncate ${index === currentStep ? 'text-green' : 'text-text-secondary'}`}>{step.title}</p>
+                  </div>
+                  {index < wizardSteps.length - 1 && (
+                     <div className={`hidden sm:block w-8 sm:w-12 h-0.5 mx-2 sm:mx-3 transition-all duration-300 ${index < currentStep ? 'bg-green' : 'bg-border'}`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="card">
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                {wizardSteps[currentStep]?.icon || <Sparkles className="text-green" size={24} />} {/* Fallback icon */}
+                <h2 className="text-2xl font-medium">{wizardSteps[currentStep]?.title || 'Loading Step...'}</h2>
+              </div>
+              <p className="text-text-secondary">{wizardSteps[currentStep]?.description || 'Please wait...'}</p>
+            </div>
+            <div className="min-h-[300px]">
+              {renderWizardStep()}
+            </div>
+            <div className="flex justify-between items-center pt-6 border-t border-border mt-6">
+              <button
+                onClick={handlePrevStep}
+                disabled={currentStep === 0}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  currentStep === 0 ? 'text-text-disabled' : 'text-green hover:bg-green hover:bg-opacity-10 border border-green border-opacity-30'
+                }`}
+              >
+                <ArrowLeft size={18} />
+                Previous
+              </button>
+              {currentStep === wizardSteps.length - 1 ? (
+                <button
+                  onClick={handleGenerateGoal} // This will eventually be "Save/Finalize IEP" or similar
+                  className="flex items-center gap-2 px-7 py-2.5 bg-green text-white rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  <Sparkles size={18} />
+                  Finalize & Generate Documents (Placeholder)
+                </button>
+              ) : (
+                <button
+                  onClick={handleNextStep}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-green text-white rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200"
+                >
+                  Next
+                  <ArrowRight size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Main component return (non-wizard view) - This part was updated by a previous Bolt prompt
   // based on your request to simplify the main page.
