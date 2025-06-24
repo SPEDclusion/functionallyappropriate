@@ -641,43 +641,199 @@ const GoalWriting: React.FC = () => {
             </div>
           </div>
         );
-      case 2: // Step 3: Student Context & Supports
+     case 2: // Step 3: Qualitative Student Data
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
+            {/* Student Strengths and Areas of Growth Section */}
             <div>
-              <label htmlFor="anecdotalObservationsGE" className="block text-sm font-medium mb-1 text-text-primary">
-                Anecdotal Observations in General Education:
-              </label>
+              <h3 className="text-lg font-semibold text-text-primary mb-4">Student Strengths and Areas of Growth</h3>
+              
+              {/* Area Selection Dropdown */}
+              <div className="mb-6">
+                <label htmlFor="areaSelection" className="block text-sm font-medium mb-2 text-text-primary">
+                  Select Academic/Functional Areas to Assess:
+                </label>
+                <select
+                  id="areaSelection"
+                  onChange={(e) => {
+                    const selectedArea = e.target.value;
+                    if (selectedArea && !wizardData.selectedAreas.includes(selectedArea)) {
+                      const newSelectedAreas = [...wizardData.selectedAreas, selectedArea];
+                      const newStrengthsAndGrowthData = {
+                        ...wizardData.strengthsAndGrowthData,
+                        [selectedArea]: {
+                          strengths: [],
+                          areasOfGrowth: [],
+                          anecdotalStrengths: '',
+                          anecdotalGrowth: ''
+                        }
+                      };
+                      setWizardData({
+                        ...wizardData,
+                        selectedAreas: newSelectedAreas,
+                        strengthsAndGrowthData: newStrengthsAndGrowthData
+                      });
+                    }
+                    e.target.value = ''; // Reset dropdown
+                  }}
+                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors"
+                >
+                  <option value="">Choose an area to add...</option>
+                  <option value="Reading">Reading</option>
+                  <option value="Writing">Writing</option>
+                  <option value="Math">Math</option>
+                  <option value="Social Emotional/Behavioral">Social Emotional/Behavioral</option>
+                  <option value="Vocational">Vocational</option>
+                  <option value="Adaptive/Daily Living Skills">Adaptive/Daily Living Skills</option>
+                  <option value="Communication">Communication</option>
+                  <option value="Fine/Gross Motor">Fine/Gross Motor</option>
+                </select>
+              </div>
+
+              {/* Display Selected Areas */}
+              {wizardData.selectedAreas.map((area) => {
+                const domainAreas = getDomainAreas(area, wizardData.currentGradeLevel);
+                const areaData = wizardData.strengthsAndGrowthData[area] || { strengths: [], areasOfGrowth: [], anecdotalStrengths: '', anecdotalGrowth: '' };
+
+                return (
+                  <div key={area} className="mb-8 p-6 border border-border rounded-lg bg-bg-primary">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-md font-semibold text-text-primary">{area}</h4>
+                      <button
+                        onClick={() => {
+                          const newSelectedAreas = wizardData.selectedAreas.filter(a => a !== area);
+                          const newStrengthsAndGrowthData = { ...wizardData.strengthsAndGrowthData };
+                          delete newStrengthsAndGrowthData[area];
+                          setWizardData({
+                            ...wizardData,
+                            selectedAreas: newSelectedAreas,
+                            strengthsAndGrowthData: newStrengthsAndGrowthData
+                          });
+                        }}
+                        className="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    {/* Domain Area Buttons */}
+                    {domainAreas.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-sm font-medium mb-2 text-text-primary">
+                          Click once for <span className="text-green font-semibold">Strength</span>, twice for <span className="text-orange-500 font-semibold">Area of Growth</span>:
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {domainAreas.map((domain) => {
+                            const isStrength = areaData.strengths.includes(domain);
+                            const isGrowth = areaData.areasOfGrowth.includes(domain);
+                            
+                            return (
+                              <button
+                                key={domain}
+                                onClick={() => {
+                                  const newAreaData = { ...areaData };
+                                  
+                                  if (!isStrength && !isGrowth) {
+                                    // First click - add to strengths
+                                    newAreaData.strengths = [...newAreaData.strengths, domain];
+                                  } else if (isStrength && !isGrowth) {
+                                    // Second click - move to areas of growth
+                                    newAreaData.strengths = newAreaData.strengths.filter(s => s !== domain);
+                                    newAreaData.areasOfGrowth = [...newAreaData.areasOfGrowth, domain];
+                                  } else if (isGrowth) {
+                                    // Third click - remove completely
+                                    newAreaData.areasOfGrowth = newAreaData.areasOfGrowth.filter(g => g !== domain);
+                                  }
+                                  
+                                  setWizardData({
+                                    ...wizardData,
+                                    strengthsAndGrowthData: {
+                                      ...wizardData.strengthsAndGrowthData,
+                                      [area]: newAreaData
+                                    }
+                                  });
+                                }}
+                                className={`p-2 text-xs rounded-md border transition-all ${
+                                  isStrength ? 'bg-green text-white border-green' :
+                                  isGrowth ? 'bg-orange-500 text-white border-orange-500' :
+                                  'bg-bg-secondary border-border hover:border-green'
+                                }`}
+                              >
+                                {domain}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Anecdotal Data Text Areas */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-text-primary">
+                          Anecdotal Data - Strengths in {area}:
+                        </label>
+                        <textarea
+                          value={areaData.anecdotalStrengths}
+                          onChange={(e) => {
+                            const newAreaData = { ...areaData, anecdotalStrengths: e.target.value };
+                            setWizardData({
+                              ...wizardData,
+                              strengthsAndGrowthData: {
+                                ...wizardData.strengthsAndGrowthData,
+                                [area]: newAreaData
+                              }
+                            });
+                          }}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                          placeholder={`e.g., ${area === 'Math' ? 'Shows strong number sense, can count to 100, understands basic addition concepts' : area === 'Reading' ? 'Recognizes all letters, knows letter sounds, enjoys being read to' : 'Demonstrates good understanding of concepts, participates actively'}`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-text-primary">
+                          Anecdotal Data - Areas of Growth in {area}:
+                        </label>
+                        <textarea
+                          value={areaData.anecdotalGrowth}
+                          onChange={(e) => {
+                            const newAreaData = { ...areaData, anecdotalGrowth: e.target.value };
+                            setWizardData({
+                              ...wizardData,
+                              strengthsAndGrowthData: {
+                                ...wizardData.strengthsAndGrowthData,
+                                [area]: newAreaData
+                              }
+                            });
+                          }}
+                          className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                          placeholder={`e.g., ${area === 'Math' ? 'Needs support with word problems, struggles with subtraction, requires manipulatives' : area === 'Reading' ? 'Difficulty with blending sounds, needs support with comprehension, limited sight word vocabulary' : 'Requires additional support and practice in this area'}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Student Performance in General Education */}
+            <div>
+              <h3 className="text-lg font-semibold text-text-primary mb-4">Student Performance in General Education</h3>
               <textarea
-                id="anecdotalObservationsGE"
-                value={wizardData.anecdotalObservationsGE}
-                onChange={(e) => setWizardData({ ...wizardData, anecdotalObservationsGE: e.target.value })}
+                value={wizardData.generalEducationPerformance}
+                onChange={(e) => setWizardData({ ...wizardData, generalEducationPerformance: e.target.value })}
                 className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Describe how the student participates in general education settings, interactions with peers, behavior patterns, engagement levels..."
+                placeholder="e.g., Student participates in general education math and reading instruction with support. Requires frequent breaks and visual supports to maintain attention. Shows progress when material is presented at a slower pace with additional practice opportunities."
               />
             </div>
+
+            {/* General Education Teacher Input */}
             <div>
-              <label htmlFor="academicStrengthsGeneralInfo" className="block text-sm font-medium mb-1 text-text-primary">
-                Academic Strengths (General Information):
-              </label>
+              <h3 className="text-lg font-semibold text-text-primary mb-4">General Education Teacher Input</h3>
               <textarea
-                id="academicStrengthsGeneralInfo"
-                value={wizardData.academicStrengthsGeneralInfo}
-                onChange={(e) => setWizardData({ ...wizardData, academicStrengthsGeneralInfo: e.target.value })}
+                value={wizardData.generalEducationTeacherInput}
+                onChange={(e) => setWizardData({ ...wizardData, generalEducationTeacherInput: e.target.value })}
                 className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Describe the student's academic strengths, preferred learning styles, subjects they excel in..."
-              />
-            </div>
-            <div>
-              <label htmlFor="areasOfGrowthQualitative" className="block text-sm font-medium mb-1 text-text-primary">
-                Areas of Growth (Qualitative):
-              </label>
-              <textarea
-                id="areasOfGrowthQualitative"
-                value={wizardData.areasOfGrowthQualitative}
-                onChange={(e) => setWizardData({ ...wizardData, areasOfGrowthQualitative: e.target.value })}
-                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                placeholder="Describe areas where the student needs continued support or shows challenges..."
+                placeholder="e.g., Teacher reports that student works well in small groups, benefits from peer support, and shows improvement when given extra time to complete assignments. Recommends continued use of visual schedules and frequent check-ins for understanding."
               />
             </div>
           </div>
