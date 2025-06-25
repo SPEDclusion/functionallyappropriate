@@ -676,183 +676,46 @@ const GoalWriting: React.FC = () => {
           </div>
         );
       case 2: // Step 3: Student Context & Supports
-return (
-  <div className="space-y-8">
-    {/* Section 1: Student Strengths and Areas of Growth */}
-    <div className="p-1 border border-transparent rounded-lg "> {/* Added padding and subtle border */}
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold text-text-primary">
-          Student Strengths and Areas of Growth
-        </h3>
-        <button
-          type="button"
-          onClick={addNewArea} // Uses your existing helper function
-          className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-lg hover:bg-opacity-90 transition-colors text-sm font-medium"
-        >
-          <Plus size={16} />
-          Add Assessment Area
-        </button>
-      </div>
-      {wizardData.selectedAreas.length === 0 && (
-        <div className="text-center py-10 text-text-secondary border border-dashed border-border rounded-lg bg-bg-secondary">
-          <Settings size={40} className="mx-auto mb-3 opacity-40" /> {/* Icon for empty state */}
-          <p className="font-medium">No assessment areas added yet.</p>
-          <p className="text-sm">Click "Add Assessment Area" to document student strengths and growth.</p>
-        </div>
-      )}
-      {wizardData.selectedAreas.map((areaKey) => { // areaKey is the string like "Reading", "Math"
-        // Get the specific data for this area from strengthsAndGrowthData
-        const areaEntryData = wizardData.strengthsAndGrowthData[areaKey] || {
-          strengths: [], // Default if not yet initialized
-          growth: [],    // Default if not yet initialized
-          anecdotalStrengths: '',
-          anecdotalGrowth: ''
-        };
-        const ccssDomainsForArea = getDomainAreas(areaKey, wizardData.currentGradeLevel);
-
         return (
-          <div key={areaKey} className="mb-8 p-6 border border-border rounded-xl bg-bg-primary shadow-sm"> {/* Individual area card */}
-            <div className="flex items-center justify-between mb-5">
-              <h4 className="text-lg font-semibold text-green capitalize">{areaKey}</h4>
-              <button
-                type="button"
-                onClick={() => removeArea(areaKey)} // Uses your existing helper function
-                className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-md transition-colors"
-                aria-label={`Remove ${areaKey} area`}
-              >
-                <X size={18} />
-              </button>
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="anecdotalObservationsGE" className="block text-sm font-medium mb-1 text-text-primary">
+                Anecdotal Observations in General Education:
+              </label>
+              <textarea
+                id="anecdotalObservationsGE"
+                value={wizardData.anecdotalObservationsGE}
+                onChange={(e) => setWizardData({ ...wizardData, anecdotalObservationsGE: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Describe how the student participates in general education settings, interactions with peers, behavior patterns, engagement levels..."
+              />
             </div>
-            {/* CCSS Domain Clickable Boxes (if applicable for the area) */}
-            { (areaKey === 'Math' || areaKey === 'Reading' || areaKey === 'Writing') && ccssDomainsForArea.length > 0 && (
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-text-primary">
-                  Identify CCSS Domain Strengths & Growth Areas for {areaKey} (Grade {wizardData.currentGradeLevel}):
-                </label>
-                <p className="text-xs text-text-secondary mb-3">
-                  Click domain once for <span className="p-1 bg-green/20 text-green rounded font-medium">Strength</span>,
-                  twice for <span className="p-1 bg-orange-500/20 text-orange-600 dark:text-orange-400 rounded font-medium">Growth Area</span>,
-                  third time to unselect.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  {ccssDomainsForArea.map((domainName) => {
-                    const isStrength = areaData.strengths.includes(domainName);
-                    const isGrowth = areaData.growth.includes(domainName);     
-                    return (
-                      <button
-                        type="button"
-                        key={domainName}
-                        onClick={() => { // Adapting your toggleDomainStatus logic (assuming it updates wizardData.strengthsAndGrowthData[areaKey].strengths/growth)
-                            const newAreaData = { ...areaData };
-                            if (!isStrength && !isGrowth) {
-                                newAreaData.strengths = [...newAreaData.strengths, domainName];
-                            } else if (isStrength && !isGrowth) {
-                                newAreaData.strengths = newAreaData.strengths.filter(s => s !== domainName);
-                                newAreaData.growth = [...newAreaData.growth, domainName];
-                            } else if (isGrowth) {
-                                newAreaData.growth = newAreaData.growth.filter(g => g !== domainName);
-                            }
-                            setWizardData(prev => ({
-                                ...prev,
-                                strengthsAndGrowthData: {
-                                    ...prev.strengthsAndGrowthData,
-                                    [areaKey]: newAreaData
-                                }
-                            }));
-                        }}
-                        className={`px-3 py-2 text-xs rounded-md border-2 font-medium transition-all duration-150 ease-in-out
-                          ${ isStrength ? 'bg-green text-white border-green hover:bg-green/80'
-                           : isGrowth ? 'bg-orange-500 text-white border-orange-500 hover:bg-orange-500/80'
-                           : 'bg-bg-secondary border-border text-text-primary hover:border-gray-400 dark:hover:border-gray-500'
-                          }`}
-                      >
-                        {domainName}
-                        {isStrength && <Check size={14} className="inline ml-1.5 -mr-0.5" />}
-                        {/* Add an icon for growth if desired, e.g., AlertCircle */}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Anecdotal Data Text Areas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor={`anecdotalStrengths-${areaKey}`} className="block text-sm font-medium mb-1.5 text-text-primary">
-                  Anecdotal Data - Strengths in {areaKey}:
-                </label>
-                <textarea
-                  id={`anecdotalStrengths-${areaKey}`}
-                  value={areaData.anecdotalStrengths}
-                  onChange={(e) => { // Adapting your updateAnecdotalData logic
-                    const newAreaData = { ...areaData, anecdotalStrengths: e.target.value };
-                    setWizardData(prev => ({
-                        ...prev,
-                        strengthsAndGrowthData: {
-                            ...prev.strengthsAndGrowthData,
-                            [areaKey]: newAreaData
-                        }
-                    }));
-                  }}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                  placeholder={getAnecdotalPlaceholder(areaKey, 'strengths')}
-                />
-              </div>
-              <div>
-                <label htmlFor={`anecdotalGrowth-${areaKey}`} className="block text-sm font-medium mb-1.5 text-text-primary">
-                  Anecdotal Data - Areas of Growth in {areaKey}:
-                </label>
-                <textarea
-                  id={`anecdotalGrowth-${areaKey}`}
-                  value={areaData.anecdotalGrowth}
-                  onChange={(e) => { // Adapting your updateAnecdotalData logic
-                    const newAreaData = { ...areaData, anecdotalGrowth: e.target.value };
-                    setWizardData(prev => ({
-                        ...prev,
-                        strengthsAndGrowthData: {
-                            ...prev.strengthsAndGrowthData,
-                            [areaKey]: newAreaData
-                        }
-                    }));
-                  }}
-                  className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
-                  placeholder={getAnecdotalPlaceholder(areaKey, 'growth')}
-                />
-              </div>
+            <div>
+              <label htmlFor="academicStrengthsGeneralInfo" className="block text-sm font-medium mb-1 text-text-primary">
+                Academic Strengths (General Information):
+              </label>
+              <textarea
+                id="academicStrengthsGeneralInfo"
+                value={wizardData.academicStrengthsGeneralInfo}
+                onChange={(e) => setWizardData({ ...wizardData, academicStrengthsGeneralInfo: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Describe the student's academic strengths, preferred learning styles, subjects they excel in..."
+              />
+            </div>
+            <div>
+              <label htmlFor="areasOfGrowthQualitative" className="block text-sm font-medium mb-1 text-text-primary">
+                Areas of Growth (Qualitative):
+              </label>
+              <textarea
+                id="areasOfGrowthQualitative"
+                value={wizardData.areasOfGrowthQualitative}
+                onChange={(e) => setWizardData({ ...wizardData, areasOfGrowthQualitative: e.target.value })}
+                className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-32"
+                placeholder="Describe areas where the student needs continued support or shows challenges..."
+              />
             </div>
           </div>
         );
-      })}
-    </div>
-    {/* Section 2: Student Performance in General Education */}
-    <div className="pt-6 border-t border-border">
-      <h3 className="text-xl font-semibold text-text-primary mb-4">
-        Student Performance in General Education
-      </h3>
-      <textarea
-        id="studentPerformanceGE" // Ensure this ID matches your wizardData field if you change it from generalEducationPerformance
-        value={wizardData.generalEducationPerformance} // Make sure this field exists in wizardData
-        onChange={(e) => setWizardData({ ...wizardData, generalEducationPerformance: e.target.value })}
-        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-40"
-        placeholder="Describe student's participation, interactions, work completion, and overall performance in the general education setting. Include how they compare to peers and any observed learning patterns."
-      />
-    </div>
-    {/* Section 3: General Education Teacher Input */}
-    <div className="pt-6 border-t border-border">
-      <h3 className="text-xl font-semibold text-text-primary mb-4">
-        General Education Teacher Input
-      </h3>
-      <textarea
-        id="generalEducationTeacherInput" // Ensure this ID matches your wizardData field
-        value={wizardData.generalEducationTeacherInput} // Make sure this field exists in wizardData
-        onChange={(e) => setWizardData({ ...wizardData, generalEducationTeacherInput: e.target.value })}
-        className="w-full p-3 border border-border rounded-lg bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-green transition-colors h-40"
-        placeholder="Summarize input received from the general education teacher(s) regarding the student's progress, challenges, successful strategies, concerns, and collaborative efforts."
-      />
-    </div>
-  </div>
-);
       case 3: // Step 4: Existing Student Data Input
         return (
           <div className="space-y-8">
