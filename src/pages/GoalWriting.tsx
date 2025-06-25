@@ -675,7 +675,6 @@ const GoalWriting: React.FC = () => {
             </div>
           </div>
         );
-      // This JSX goes inside the renderWizardStep() function, for case 2:
 // case 2: // Step 3: Qualitative Student Data (Your new title for this step)
 return (
   <div className="space-y-8">
