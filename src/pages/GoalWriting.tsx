@@ -675,7 +675,7 @@ const GoalWriting: React.FC = () => {
             </div>
           </div>
         );
-// case 2: // Step 3: Qualitative Student Data (Your new title for this step)
+      case 2: // Step 3: Student Context & Supports
 return (
   <div className="space-y-8">
     {/* Section 1: Student Strengths and Areas of Growth */}
@@ -693,7 +693,6 @@ return (
           Add Assessment Area
         </button>
       </div>
-
       {wizardData.selectedAreas.length === 0 && (
         <div className="text-center py-10 text-text-secondary border border-dashed border-border rounded-lg bg-bg-secondary">
           <Settings size={40} className="mx-auto mb-3 opacity-40" /> {/* Icon for empty state */}
@@ -701,7 +700,6 @@ return (
           <p className="text-sm">Click "Add Assessment Area" to document student strengths and growth.</p>
         </div>
       )}
-
       {wizardData.selectedAreas.map((areaKey) => { // areaKey is the string like "Reading", "Math"
         // Get the specific data for this area from strengthsAndGrowthData
         const areaEntryData = wizardData.strengthsAndGrowthData[areaKey] || {
@@ -725,7 +723,6 @@ return (
                 <X size={18} />
               </button>
             </div>
-
             {/* CCSS Domain Clickable Boxes (if applicable for the area) */}
             { (areaKey === 'Math' || areaKey === 'Reading' || areaKey === 'Writing') && ccssDomainsForArea.length > 0 && (
               <div className="mb-6">
@@ -740,8 +737,7 @@ return (
                 <div className="flex flex-wrap gap-3">
                   {ccssDomainsForArea.map((domainName) => {
                     const isStrength = areaData.strengths.includes(domainName);
-                    const isGrowth = areaData.growth.includes(domainName);
-                    
+                    const isGrowth = areaData.growth.includes(domainName);     
                     return (
                       <button
                         type="button"
@@ -829,7 +825,6 @@ return (
         );
       })}
     </div>
-
     {/* Section 2: Student Performance in General Education */}
     <div className="pt-6 border-t border-border">
       <h3 className="text-xl font-semibold text-text-primary mb-4">
@@ -843,7 +838,6 @@ return (
         placeholder="Describe student's participation, interactions, work completion, and overall performance in the general education setting. Include how they compare to peers and any observed learning patterns."
       />
     </div>
-
     {/* Section 3: General Education Teacher Input */}
     <div className="pt-6 border-t border-border">
       <h3 className="text-xl font-semibold text-text-primary mb-4">
